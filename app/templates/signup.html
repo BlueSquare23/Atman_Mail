@@ -2,11 +2,13 @@
 {% block title %}Signup{% endblock %}
 
 {% block content %}
+<div class="container bg-dark border border-secondary p-2">
+
 <form method="POST">
-	<h3 align="enter">
+	<h3 align="enter" style="color: white">
 		Signup
 	</h3>
-	<div class="form-group">
+	<div class="form-group" style="color: white">
 		<label for="email">Email Address</label>
 		<input type="text" 
 			id="email" 
@@ -15,7 +17,7 @@
 			placeholder="Enter Email Address"
 		/>
 
-		<label for="password1">Password</label>
+		<label for="password1" style="color: white">Password</label>
 		<input type="password"
 			id="password1"
 			name="password1"
@@ -23,7 +25,7 @@
 			placeholder="Enter Password"
 		/>
 
-		<label for="password2">Confirm Password</label>
+		<label for="password2" style="color: white">Confirm Password</label>
 		<input type="password"
 			id="password2"
 			name="password2"
@@ -31,7 +33,7 @@
 			placeholder="Retype Password"
 		/>
 
-		<label for="outgoing_hostname">Outgoing Mail Server Hostname</label>
+		<label for="outgoing_hostname" style="color: white">Outgoing Mail Server Hostname</label>
 		<input type="text" 
 			id="outgoing_hostname" 
 			name="outgoing_hostname" 
@@ -39,7 +41,7 @@
 			placeholder="Enter Outgoing Hostname"
 		/>
 
-		<label for="incoming_hostname">Incoming Mail Server Hostname</label>
+		<label for="incoming_hostname" style="color: white">Incoming Mail Server Hostname</label>
 		<input type="text" 
 			id="incoming_hostname" 
 			name="incoming_hostname" 
@@ -47,7 +49,7 @@
 			placeholder="Enter Incoming Hostname"
 		/>
 
-		<label for="smtp_port">Outgoing Mail Server Port</label>
+		<label for="smtp_port" style="color: white">Outgoing Mail Server Port</label>
 		<input type="number" 
 			id="smtp_port" 
 			name="smtp_port" 
@@ -55,7 +57,7 @@
 			placeholder="Enter Outgoing Port"
 		/>
 
-		<label for="imap_port">Incoming Mail Server Port</label>
+		<label for="imap_port" style="color: white">Incoming Mail Server Port</label>
 		<input type="number" 
 			id="imap_port" 
 			name="imap_port" 
@@ -72,4 +74,5 @@
 		</center>		
 	</div>
 </form>
+</div>
 {% endblock %}

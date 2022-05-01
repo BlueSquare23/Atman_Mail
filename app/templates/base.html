@@ -9,11 +9,16 @@
 		rel="stylesheet" 
 		integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" 
 		crossorigin="anonymous">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
 
 	<title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
+<a name="top"></a>
+
 	<!-- Bootstrap Navbar https://getbootstrap.com/docs/5.1/components/navbar/ -->
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container-fluid">
@@ -72,7 +77,12 @@
 		{% endif %}
 	{% endwith %}
 
+	<div id="invisible-container" class="container-fluid">
+	</div>
+
 	<div class="container">{% block content %}{% endblock %}</div>
+
+	<button id="topBtn" class="border-secondary bg-secondary"><a href="#top" style="color: white">/\ Top /\</a></button>
 
 	<!-- Bootstrap JavaScript Bundle with Popper -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" 

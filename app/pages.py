@@ -24,9 +24,11 @@ pages = Blueprint("pages", __name__)
 @login_required
 def home():
 	msg_num = request.args.get('msg_num')
+	folder = request.args.get('folder')
 
-	if msg_num == None:
-		msg_num = "1"
+	if folder == None:
+		full_url = url_for('.home', folder="INBOX", **request.args)
+		return redirect(full_url)
 
 	imap_host = User.query.first().outgoing_hostname
 	imap_user = User.query.first().email
@@ -46,12 +48,12 @@ def home():
 			if isinstance(response_part, tuple):
 				msg = email.message_from_bytes(response_part[1])
 				if msg.get_content_type() == "text/plain":
-					return msg.get_payload()	
+					return "From: " + msg['from'] + "\n" + "Subject: " + msg['subject'] + "\n\n" + msg.get_payload()
 				else:
 					for part in msg.walk():
 						print(part.get_content_type())
 						if part.get_content_type() == "text/plain":
-							return str(part)
+							return "From: " + msg['from'] + "\n" + "Subject: " + msg['subject'] + "\n\n" + str(part)
 		
 	# connect to host using SSL
 	imap = imaplib.IMAP4(imap_host)
@@ -77,19 +79,40 @@ def home():
 		sorted_folders.update({key: folders[key]})
 
 	# Select all mailbox information.
-	imap.select()
+	imap.select(str(folder), readonly=True)
 
 	type, data = imap.search(None, 'ALL')
 	mail_ids = data[0].decode('utf-8')
 	id_list = mail_ids.split()
-	imap.select('INBOX', readonly=True)
-	
+
+	# Initialize empty messages list.
 	messages = []
 
-	# Get message list info.
-	message_list(id_list)
+	# If there are messages in the mailbox.
+	if id_list:
+		# If no GET parameter, do latest message.
+		if msg_num == None:
+			msg_num = id_list[-1]
+			full_url = url_for('.home', msg_num=msg_num, **request.args)
+			return redirect(full_url)
+		if msg_num > id_list[-1]:
+			msg_num = id_list[-1]
+			full_url = url_for('.home', msg_num=msg_num, folder=folder)
+			return redirect(full_url)
 
-	return render_template("home.html", user=current_user, sorted_folders=sorted_folders, messages=messages, body=get_msg_body(msg_num))
+		# Get message list info.
+		message_list(id_list)
+
+		body=get_msg_body(msg_num)
+	else:
+		if msg_num != None:
+			msg_num = id_list[-1]
+			full_url = url_for('.home', **request.args)
+			return redirect(full_url)
+		if msg_num == None:
+			body="No message in folder!"
+
+	return render_template("home.html", user=current_user, sorted_folders=sorted_folders, messages=messages, body=body)
 
 @pages.route("/send", methods=['GET', 'POST'])
 @login_required
