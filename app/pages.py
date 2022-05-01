@@ -25,6 +25,7 @@ pages = Blueprint("pages", __name__)
 def home():
 	msg_num = request.args.get('msg_num')
 	folder = request.args.get('folder')
+	page_num = request.args.get('page_num')
 
 	if folder == None:
 		full_url = url_for('.home', folder="INBOX", **request.args)
@@ -88,6 +89,17 @@ def home():
 	# Initialize empty messages list.
 	messages = []
 
+	if page_num == None:
+		full_url = url_for('.home', page_num=1, **request.args)
+		return redirect(full_url)
+
+	# 10 Messages per page.
+	if int(id_list[-1]) > 10:
+		last_msg_of_page = 11 * int(page_num)
+		first_msg_of_page = last_msg_of_page - 10
+		id_list = range(int(id_list[-last_msg_of_page]), int(id_list[-first_msg_of_page]))
+		print(id_list)
+
 	# If there are messages in the mailbox.
 	if id_list:
 		# If no GET parameter, do latest message.
@@ -95,11 +107,11 @@ def home():
 			msg_num = id_list[-1]
 			full_url = url_for('.home', msg_num=msg_num, **request.args)
 			return redirect(full_url)
-		if msg_num > id_list[-1]:
+		if int(msg_num) > id_list[-1]:
 			msg_num = id_list[-1]
 			full_url = url_for('.home', msg_num=msg_num, folder=folder)
 			return redirect(full_url)
-
+		
 		# Get message list info.
 		message_list(id_list)
 

@@ -32,11 +32,10 @@
 			    </tr>
 			  </thead>
 			{% for row in messages %}
-			  {% set outer_loop_index = loop.revindex %}
 			  <tbody>
 			    <tr>
 				{% for cell in row %}
-				  <td><a href="/home?msg_num={{outer_loop_index}}&folder={{ request.args.get('folder') }}">{{cell}}</a></td>
+				  <td><a href="/home?msg_num={{msg_num}}&folder={{ request.args.get('folder') }}">{{cell}}</a></td>
 				{% endfor %}
 			    </tr>
 			  </tbody>
