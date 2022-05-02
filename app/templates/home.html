@@ -2,6 +2,8 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+
+
 <div class="container">
 	<div class="row">
 		<div class="col-sm">
@@ -32,9 +34,9 @@
 			      <th scope="col" title="Date">Date</th>
 			    </tr>
 			  </thead>
+			  <tbody>
 			{% set ns = namespace (msg_num = 0) %}
 			{% for row in messages %}
-			  <tbody>
 			    <tr>
 				{% for cell in row %}
 					{% if cell|int != 0 %}
@@ -43,8 +45,8 @@
 				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell}}</a></td>
 				{% endfor %}
 			    </tr>
-			  </tbody>
 			{% endfor %}
+			  </tbody>
 		</div>
 		<div class="col-sm bg-dark border border-secondary p-2">
 			<pre style="color: white">{{body}}</pre>
@@ -52,5 +54,16 @@
 		<div id="invisible-container" class="container-fluid">
 		</div>
 	</div>
+</div>
+
+<div class=" bg-dark border border-secondary p-2">
+		<b>Pages:</b>
+	<nav aria-label="pagination page numbering">
+	  <ul class="pagination justify-content-center">
+		{% for page in range(1, (num_pages + 1)) %}
+		  <li class="page-item"><a class="page-link" href="/home?page_num={{page}}&folder={{ request.args.get('folder')}}">{{page}}</a></li>
+		{% endfor %}
+	  </ul>
+	</nav>
 </div>
 {% endblock %}

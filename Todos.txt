@@ -1,0 +1,5 @@
+* Make imap settings check function.
+	- Pipe back to signup route.
+* Rename signup to setup.
+* Add currently logged in user to top bar.
+* Add message toolbar for reply, forward, delete, ect.
