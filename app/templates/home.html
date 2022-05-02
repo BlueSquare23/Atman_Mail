@@ -26,16 +26,21 @@
 			<table class="table table-hover table-dark table-bordered table-condensed border-secondary">
 			  <thead>
 			    <tr>
+			      <th scope="col" title="Message Number">Msg #</th>
 			      <th scope="col" title="From">From</th>
 			      <th scope="col" title="Subject">Subject</th>
 			      <th scope="col" title="Date">Date</th>
 			    </tr>
 			  </thead>
+			{% set ns = namespace (msg_num = 0) %}
 			{% for row in messages %}
 			  <tbody>
 			    <tr>
 				{% for cell in row %}
-				  <td><a href="/home?msg_num={{msg_num}}&folder={{ request.args.get('folder') }}">{{cell}}</a></td>
+					{% if cell|int != 0 %}
+				      {% set ns.msg_num = cell %}
+					{% endif %}
+				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell}}</a></td>
 				{% endfor %}
 			    </tr>
 			  </tbody>
