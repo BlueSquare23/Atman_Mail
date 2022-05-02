@@ -77,7 +77,6 @@ def home():
 		type, data = imap.search(None, 'ALL')
 		mail_ids = data[0].decode('utf-8')
 		id_list = mail_ids.split()
-		print(id_list)
 		return id_list
 
 	# Connection settings.
@@ -126,15 +125,39 @@ def home():
 		messages = ""
 		body = "No messages in folder!"
 	else:
-		messages = message_list(get_id_list(imap))
+		# 10 Messages per page.
+		last_msg_num = int(get_id_list(imap)[-1])
+
+		# Find page number from msg_num.
+		difference = last_msg_num - int(msg_num)
+		correct_page_num = int(difference / 10) + 1
+
+		# If not on the right page change pages,
+		if int(page_num) != correct_page_num:
+			full_url = url_for('.home', page_num=correct_page_num, folder=folder, msg_num=msg_num)
+			return redirect(full_url)
+
+		# By this point the page_num, and msg_num should be set correctly.
+
+		# Set messages list based off of page_num and msg_num.
+
+		# Round up integer division to get number pages total.
+		num_pages = int(last_msg_num / 10) + (last_msg_num % 10 > 0)
+
+		if int(page_num) == 1:
+			messages = message_list(range((last_msg_num - 10), last_msg_num))
+		if int(page_num) == 2:
+			messages = message_list(range((int(last_msg_num) - 10)))
+		if int(page_num) == 3:
+			messages = message_list(range((int(last_msg_num) - 10)))
+
 		body = get_msg_body(msg_num)
 
-#	if page_num == None:
-#		full_url = url_for('.home', page_num=1, **request.args)
-#		return redirect(full_url)
+# All messages on one page.
+#		messages = message_list(get_id_list(imap))
+#		body = get_msg_body(msg_num)
 
 
-#	# 10 Messages per page.
 #	if int(id_list[-1]) > 10:
 #		last_msg_of_page = (10 * int(page_num)) * -1
 #		if int(page_num) == 1:
