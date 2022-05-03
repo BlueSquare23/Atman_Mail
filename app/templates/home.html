@@ -42,7 +42,7 @@
 					{% if cell|int != 0 %}
 				      {% set ns.msg_num = cell %}
 					{% endif %}
-				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell|string|truncate(50)}}</a></td>
+				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell|string|truncate(20)}}</a></td>
 				{% endfor %}
 			    </tr>
 			{% endfor %}
@@ -58,6 +58,37 @@
 
 <div class=" bg-dark border border-secondary p-2">
 		<b style="color: white">Pages:</b>
+
+<nav aria-label="pagination page numbering">
+  <ul class="pagination justify-content-center">
+	{% if (request.args.get('page_num')|int - 2) > 1 %}
+    <li class="page-item">
+      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 2}}&folder={{request.args.get('folder')}}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+	{% endif %}
+	{% if (request.args.get('page_num')|int - 1) > 1 %}
+    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int - 1}}</a></li>
+	{% endif %}
+    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')}}</a></li>
+	{% if (request.args.get('page_num')|int + 1) < num_pages %}
+    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int + 1}}</a></li>
+	{% endif %}
+	{% if (request.args.get('page_num')|int + 1) < num_pages %}
+    <li class="page-item">
+      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+	{% endif %}
+  </ul>
+</nav>
+</div>
+
+<!--
+<div class=" bg-dark border border-secondary p-2">
+		<b style="color: white">Pages:</b>
 	<nav aria-label="pagination page numbering">
 	  <ul class="pagination justify-content-center">
 		{% for page in range(1, (num_pages + 1)) %}
@@ -65,5 +96,5 @@
 		{% endfor %}
 	  </ul>
 	</nav>
-</div>
+-->
 {% endblock %}
