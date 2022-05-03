@@ -1,7 +1,17 @@
+## Frontend
+* Add currently logged in user to top bar.
+
+## Backend
+* Rename signup to setup.
+* Add try, excepts around SMTP/IMAP connection logic.
+
+## Incomming
 * Make imap settings check function.
 	- Pipe back to signup route.
-* Rename signup to setup.
-* Add currently logged in user to top bar.
 * Add message toolbar for reply, forward, delete, ect.
-* Add, "save as draft" button to send page.
 * Add ability to move messages to different folder.
+
+## Outgoing
+* Add, "save as draft" button to send page.
+* Add ability to attach file to a message.
+* Add ability to add CC and BCC.

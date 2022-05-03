@@ -30,7 +30,6 @@ def home():
 
 		folders = {}
 		
-		print("Directories")
 		# Pull out folder names and number of messages.
 		for directory in directories:
 			directory_name = directory.decode().split('"')[-1].strip()
@@ -205,7 +204,5 @@ def send():
 		except:
 			flash("Sending Failed!", category='error')
 
-
-		print("Sent message!")
 
 	return render_template("send.html", user=current_user)

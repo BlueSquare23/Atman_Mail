@@ -57,8 +57,7 @@
 </div>
 
 <div class=" bg-dark border border-secondary p-2">
-		<b style="color: white">Pages:</b>
-{{num_pages}}
+		<b style="color: white">Total Pages: </b>{{num_pages}}
 
 <nav aria-label="pagination page numbering">
   <ul class="pagination justify-content-center">
@@ -89,16 +88,4 @@
   </ul>
 </nav>
 </div>
-
-<!--
-<div class=" bg-dark border border-secondary p-2">
-		<b style="color: white">Pages:</b>
-	<nav aria-label="pagination page numbering">
-	  <ul class="pagination justify-content-center">
-		{% for page in range(1, (num_pages + 1)) %}
-		  <li class="page-item"><a class="page-link" href="/home?page_num={{page}}&folder={{ request.args.get('folder')}}">{{page}}</a></li>
-		{% endfor %}
-	  </ul>
-	</nav>
--->
 {% endblock %}
