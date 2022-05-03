@@ -3,3 +3,5 @@
 * Rename signup to setup.
 * Add currently logged in user to top bar.
 * Add message toolbar for reply, forward, delete, ect.
+* Add, "save as draft" button to send page.
+* Add ability to move messages to different folder.
