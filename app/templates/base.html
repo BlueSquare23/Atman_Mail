@@ -22,6 +22,9 @@
 	<!-- Bootstrap Navbar https://getbootstrap.com/docs/5.1/components/navbar/ -->
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container-fluid">
+				<a class="navbar-brand" href="/home">
+				<img src="/static/img/favicon.ico" alt="" width="30" height="24" class="d-inline-block align-text-top">
+				</a>
 			<button class="navbar-toggler" 
 				type="button" 
 				data-bs-toggle="collapse"
@@ -40,6 +43,11 @@
 					<a class="nav-item nav-link" href="/login">Login</a>
 					{% endif %}
 				</div>
+			</div>
+			<div class="d-flex justify-content-end pe-2" style="color: white">
+				{% if user.is_authenticated %}
+					{{user.email}}
+				{% endif %}
 			</div>
 		</div>
 	</nav>

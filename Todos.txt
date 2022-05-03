@@ -1,8 +1,6 @@
 ## Frontend
-* Add currently logged in user to top bar.
 
 ## Backend
-* Rename signup to setup.
 * Add try, excepts around SMTP/IMAP connection logic.
 
 ## Incomming

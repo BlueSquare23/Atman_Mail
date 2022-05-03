@@ -15,7 +15,7 @@ auth = Blueprint("auth", __name__)
 def login():
 	if User.query.first() == None:
 		flash("Please add a user!", category='success')
-		return redirect(url_for('auth.signup'))
+		return redirect(url_for('auth.setup'))
 
 	if request.method == 'POST':
 		email = request.form.get("email")
@@ -35,8 +35,8 @@ def login():
 
 	return render_template("login.html", user=current_user)
 
-@auth.route("/signup", methods=['GET', 'POST'])
-def signup():
+@auth.route("/setup", methods=['GET', 'POST'])
+def setup():
 	if request.method == 'POST':
 		# Collect form data
 		email = request.form.get("email")
@@ -74,7 +74,7 @@ def signup():
 			return redirect(url_for('pages.home'))
 
 	if User.query.first() == None:
-		return render_template("signup.html", user=current_user)
+		return render_template("setup.html", user=current_user)
 	else:
 		flash("User already added. Please sign in!", category='success')
 		return redirect(url_for('auth.login'))

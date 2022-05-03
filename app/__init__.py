@@ -27,7 +27,7 @@ def create_app():
 
 	# Setup LoginManager
 	login_manager = LoginManager()
-	# Redirect to auth.login if not already signup.
+	# Redirect to auth.login if not already logged in.
 	login_manager.login_view = "auth.login"
 	login_manager.login_message = None
 	login_manager.init_app(app)
