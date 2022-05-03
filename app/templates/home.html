@@ -58,24 +58,28 @@
 
 <div class=" bg-dark border border-secondary p-2">
 		<b style="color: white">Pages:</b>
+{{num_pages}}
 
 <nav aria-label="pagination page numbering">
   <ul class="pagination justify-content-center">
-	{% if (request.args.get('page_num')|int - 2) > 1 %}
+	{% if (request.args.get('page_num')|int - 1) >= 1 %}
     <li class="page-item">
-      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 2}}&folder={{request.args.get('folder')}}" aria-label="Previous">
+      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}" aria-label="Previous">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>
 	{% endif %}
-	{% if (request.args.get('page_num')|int - 1) > 1 %}
+	{% if (request.args.get('page_num')|int - 1) >= 1 %}
     <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int - 1}}</a></li>
 	{% endif %}
-    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')}}</a></li>
-	{% if (request.args.get('page_num')|int + 1) < num_pages %}
+	<li class="page-item active" aria-current="page">
+    <a class="page-link" href="/home?page_num={{request.args.get('page_num')}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')}}</a>
+	</li>
+	
+	{% if (request.args.get('page_num')|int + 1) <= num_pages %}
     <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int + 1}}</a></li>
 	{% endif %}
-	{% if (request.args.get('page_num')|int + 1) < num_pages %}
+	{% if (request.args.get('page_num')|int + 1) <= num_pages %}
     <li class="page-item">
       <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}" aria-label="Next">
         <span aria-hidden="true">&raquo;</span>
