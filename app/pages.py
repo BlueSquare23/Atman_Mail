@@ -30,11 +30,15 @@ def home():
 
 		folders = {}
 		
+		print("Directories")
 		# Pull out folder names and number of messages.
 		for directory in directories:
 			directory_name = directory.decode().split('"')[-1].strip()
-			resp_code, mail_count = imap.select(mailbox=directory_name, readonly=True)
-			folders.update({directory_name: str(mail_count[0], 'utf-8')})
+			try:
+				resp_code, mail_count = imap.select(mailbox=directory_name, readonly=True)
+				folders.update({directory_name: str(mail_count[0], 'utf-8')})
+			except:
+				print(f"Cannot get number of messages for: {directory_name}")
 		
 		sorted_folders = {}
 
@@ -57,7 +61,7 @@ def home():
 						msg = email.message_from_bytes(response_part[1])
 						messages.insert(0, [i, str(msg['from']), str(msg['subject']), str(msg['date'])])
 			except:
-				print("Out of range, Will l3rn 2 cod3 2morrow!")
+				print("Out of range, Will l3rn 2 c0d3 2morrow!")
 
 		return messages
 

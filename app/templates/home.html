@@ -42,7 +42,7 @@
 					{% if cell|int != 0 %}
 				      {% set ns.msg_num = cell %}
 					{% endif %}
-				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell}}</a></td>
+				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell|string|truncate(50)}}</a></td>
 				{% endfor %}
 			    </tr>
 			{% endfor %}
@@ -57,7 +57,7 @@
 </div>
 
 <div class=" bg-dark border border-secondary p-2">
-		<b>Pages:</b>
+		<b style="color: white">Pages:</b>
 	<nav aria-label="pagination page numbering">
 	  <ul class="pagination justify-content-center">
 		{% for page in range(1, (num_pages + 1)) %}
