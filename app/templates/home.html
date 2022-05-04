@@ -86,7 +86,12 @@
 			  </tbody>
 		</div>
 		<div class="col-sm bg-dark border border-secondary">
-			<textarea class="bg-dark border border-secondary" style="width: 100%; height: 100%; color: white" rows="15" readonly>{{body}}</textarea>
+			<textarea class="bg-dark border border-secondary" style="width: 100%; height: 100%; color: white; padding: 5px" rows="15" readonly>{{body}}</textarea>
+			<div class="d-flex justify-content-center">
+				<a class="btn btn-primary mb-1 me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=reply" role="button">Reply</a>
+				<a class="btn btn-primary mb-1 me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=forward" role="button">Forward</a>
+				<a class="btn btn-primary mb-1 me-1" href="#" role="button">Delete</a>
+			</div>
 		</div>
 		<div id="invisible-container" class="container-fluid">
 		</div>

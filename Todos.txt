@@ -1,11 +1,12 @@
 ## Frontend
+* Make textbox num rows sames as num lines in {{body}} text up to ~20 rows. 
 
 ## Backend
 * Add try, excepts around SMTP/IMAP connection logic.
 
 ## Incomming
 * Make imap settings check function.
-	- Pipe back to signup route.
+	- Pipe back to setup route.
 * Add message toolbar for reply, forward, delete, ect.
 * Add ability to move messages to different folder.
 

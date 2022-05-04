@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import imaplib
 import email
 import os
+import re
+from .imap_functions import sort_folders, message_list, get_msg_body, get_id_list
 
 # Load environment vars
 env_path = Path('.') / '.env'
@@ -19,72 +21,7 @@ PASS = os.environ['PASS']
 
 pages = Blueprint("pages", __name__)
 
-@pages.route("/", methods=['GET'])
-@pages.route("/home", methods=['GET'])
-@login_required
-def home():
-
-	def sort_folders(imap):
-		# List directories
-		resp_code, directories = imap.list()
-
-		folders = {}
-		
-		# Pull out folder names and number of messages.
-		for directory in directories:
-			directory_name = directory.decode().split('"')[-1].strip()
-			try:
-				resp_code, mail_count = imap.select(mailbox=directory_name, readonly=True)
-				folders.update({directory_name: str(mail_count[0], 'utf-8')})
-			except:
-				print(f"Cannot get number of messages for: {directory_name}")
-		
-		sorted_folders = {}
-
-		for key in sorted(folders.keys()):
-			sorted_folders.update({key: folders[key]})
-
-		return sorted_folders
-
-	def message_list(id_list):
-		# Select all mailbox information.
-		imap.select(str(folder), readonly=True)
-
-		# Initialize empty messages list.
-		messages = []
-		for i in id_list:
-			try:
-				typ, msg_data = imap.fetch(str(i), '(RFC822)')
-				for response_part in msg_data:
-					if isinstance(response_part, tuple):
-						msg = email.message_from_bytes(response_part[1])
-						messages.insert(0, [i, str(msg['from']), str(msg['subject']), str(msg['date'])])
-			except:
-				print("Out of range, Will l3rn 2 c0d3 2morrow!")
-
-		return messages
-
-	def get_msg_body(msg_num):
-		resp_code, msg_data = imap.fetch(str(msg_num), '(RFC822)') ## Fetch mail data.
-		for response_part in msg_data:
-			if isinstance(response_part, tuple):
-				msg = email.message_from_bytes(response_part[1])
-				if msg.get_content_type() == "text/plain":
-					return "From: " + str(msg['from']) + "\n" + "Date: " + str(msg['date']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + msg.get_payload()
-				else:
-					for part in msg.walk():
-						print(part.get_content_type())
-						if part.get_content_type() == "text/plain":
-							return "From: " + str(msg['from']) + "\n" + "Date: " + str(msg['date']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + str(part)
-	def get_id_list(imap):
-		# Select all mailbox information.
-		imap.select(str(folder), readonly=True)
-
-		type, data = imap.search(None, 'ALL')
-		mail_ids = data[0].decode('utf-8')
-		id_list = mail_ids.split()
-		return id_list
-
+def use_imap():
 	# Connection settings.
 	imap_host = User.query.first().outgoing_hostname
 	imap_user = User.query.first().email
@@ -96,7 +33,17 @@ def home():
 	
 	# Auth to the server.
 	imap.login(imap_user, imap_pass)
+	imap.select()
 	
+	return imap
+
+@pages.route("/", methods=['GET'])
+@pages.route("/home", methods=['GET'])
+@login_required
+def home():
+
+	imap = use_imap()
+
 	# GET parameters
 	msg_num = request.args.get('msg_num', type = int)
 	folder = request.args.get('folder')
@@ -121,7 +68,7 @@ def home():
 	# If the msg_num is unspecified, 
 	if bool(msg_num) != True:
 		# And there are messages in the folder, 
-		id_list = get_id_list(imap)
+		id_list = get_id_list(imap, folder)
 		if id_list != []:
 			# Default to the latest message on the page.
 			print("Page Num: " + str(page_num))
@@ -137,12 +84,12 @@ def home():
 
 
 	# If there are no messages in the folder,
-	if get_id_list(imap) == []:
+	if get_id_list(imap, folder) == []:
 		messages = ""
 		body = "No messages in folder!"
 		num_pages = 1
 	else:
-		last_msg_num = int(get_id_list(imap)[-1]) + 1
+		last_msg_num = int(get_id_list(imap, folder)[-1]) + 1
 
 		# Find page number from msg_num.
 		difference = last_msg_num - int(msg_num)
@@ -160,15 +107,12 @@ def home():
 		# Round up integer division to get number pages total.
 		num_pages = int(last_msg_num / num_msg_per_page) + (last_msg_num % num_msg_per_page > 0)
 
-		#print("Number of pages: " + str(num_pages))
-
 		# Magic pagination algorithm. Do not touch!
-		#print(range((last_msg_num - (num_msg_per_page * page_num)), (last_msg_num - ((page_num - 1) * num_msg_per_page))))
-		messages = message_list(range((last_msg_num - (num_msg_per_page * page_num)), (last_msg_num - ((page_num - 1) * num_msg_per_page))))
-		body = get_msg_body(msg_num)
+		messages = message_list(imap, folder, range((last_msg_num - (num_msg_per_page * page_num)), (last_msg_num - ((page_num - 1) * num_msg_per_page))))
+		body = get_msg_body(imap, msg_num, folder)
 
 # All messages on one page.
-#		messages = message_list(get_id_list(imap))
+#		messages = message_list(imap, folder, get_id_list(imap))
 #		body = get_msg_body(msg_num)
 
 	return render_template("home.html", user=current_user, sorted_folders=sort_folders(imap), messages=messages, body=body, num_pages=num_pages)
@@ -201,8 +145,60 @@ def send():
 			s.sendmail(from_addr, to_addr, message.as_string())
 			s.quit()
 			flash("Message Sent!", category='success')
+			full_url = url_for('.home')
+			return redirect(full_url)
 		except:
 			flash("Sending Failed!", category='error')
+			full_url = url_for('.send')
+			return redirect(full_url)
+	else:
+		# GET parameters
+		msg_num = request.args.get('msg_num', type = int)
+		folder = request.args.get('folder')
+		mode = request.args.get('mode')
 
+		if bool(msg_num) != True or bool(msg_num) != True or bool(mode) != True:
+			body = None
+			to_addr = None
+			subject = None
+		else:
+			imap = use_imap()
+			body = get_msg_body(imap, msg_num, folder)
 
-	return render_template("send.html", user=current_user)
+			# Get subject.
+			subject_line = body.split('\n', 3)[2]
+			subject = subject_line.split(":",1)[1] 
+
+			# Reformat body text.
+			if mode == "reply":
+				# Pull out from addr using regex.
+				from_line = body.partition('\n')[0]
+				from_addr = re.search(r'[\w.+-]+@[\w-]+\.[\w.-]+', from_line).group(0)
+				to_addr = from_addr
+
+				subject = "Re:" + subject
+
+				results = []
+				results.append("> --------------- Original Message ---------------")
+				results.append("> ")
+
+				# Add leading > Chars to body.
+				for line in body.split('\n'):
+					results.append("> " + line)
+
+				body = '\n\n' + '\n'.join(results)
+
+			elif mode == "forward":
+				to_addr = None
+				subject = "Fwd:" + subject
+
+				results = []
+				results.append("--------------- Original Message ---------------")
+
+				# Add leading > Chars to body.
+				for line in body.split('\n'):
+					results.append(line)
+
+				body = '\n\n' + '\n'.join(results)
+
+		return render_template("send.html", user=current_user, body=body, to_addr=to_addr, subject=subject)

@@ -3,10 +3,11 @@
 
 {% block content %}
 <div class="container bg-dark border border-secondary p-2">
-<form method="POST">
+<form method="POST" action="/send">
 	<h3 align="enter" style="color: white">
 		Send Message
 	</h3>
+
 	<div class="form-group" style="color: white">
 		<label for="to_addr">To Address</label>
 		<input type="text" 
@@ -14,6 +15,9 @@
 			name="to_addr" 
 			class="form-control"
 			placeholder="Enter To Address"
+		{% if to_addr != None %}
+			value="{{to_addr}}"
+		{% endif %}
 		/>
 
 		<label for="subject" style="color: white">Subject</label>
@@ -22,11 +26,17 @@
 			name="subject" 
 			class="form-control"
 			placeholder="Enter Email Subject"
+		{% if subject != None %}
+			value="{{subject}}"
+		{% endif %}
 		/>
 
 		<label for="body" style="color: white">Body</label>
 		<div class="input-group">
-			<textarea class="form-control" name="body" placeholder="Compose Message..."></textarea>
+			<textarea class="form-control" 
+				name="body"
+				rows="10"
+				placeholder="Compose Message...">{% if body != None %}{{body}}{% endif %}</textarea>
 		</div>
 
 		<br/>
