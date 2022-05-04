@@ -70,12 +70,12 @@ def home():
 			if isinstance(response_part, tuple):
 				msg = email.message_from_bytes(response_part[1])
 				if msg.get_content_type() == "text/plain":
-					return "Index Number: " + str(msg_num) + "\n" + "From: " + str(msg['from']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + msg.get_payload()
+					return "From: " + str(msg['from']) + "\n" + "Date: " + str(msg['date']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + msg.get_payload()
 				else:
 					for part in msg.walk():
 						print(part.get_content_type())
 						if part.get_content_type() == "text/plain":
-							return "Index Number: " + str(msg_num) + "\n" + "From: " + str(msg['from']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + str(part)
+							return "From: " + str(msg['from']) + "\n" + "Date: " + str(msg['date']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + str(part)
 	def get_id_list(imap):
 		# Select all mailbox information.
 		imap.select(str(folder), readonly=True)
