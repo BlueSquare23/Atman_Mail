@@ -25,6 +25,32 @@ def delete_msg(imap, msg_num):
 		print("Response Code : {}".format(resp_code))
 		print("Response      : {}\n".format(response[0].decode()))
 
+def move_msg(imap, msg_num, src_folder, dst_folder):
+
+	imap.select(mailbox=src_folder, readonly=False)
+
+	try:
+		# Copy Message to dst_folder
+		resp_code, response = imap.copy(str(msg_num), dst_folder)
+		print("Response Code : {}".format(resp_code))
+		print("Response      : {}".format(response[0].decode()))
+
+		# Delete Message from src_folder
+		resp_code, response = imap.store(str(msg_num), '+FLAGS', '\\Deleted')
+		print("Response Code : {}".format(resp_code))
+		print("Response      : {}\n".format(response[0].decode()))
+
+		# Expunge src_folder
+		resp_code, response = imap.expunge()
+		print("Response Code : {}".format(resp_code))
+		print("Response      : {}\n".format(response[0].decode()))
+
+		return True
+
+	except:
+		return False
+	
+
 def move_msg_to_trash(imap, msg_num, folder):
 	if check_for_trash_folder(imap) == True:
 		print("Fart!")

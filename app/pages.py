@@ -11,7 +11,7 @@ import imaplib
 import email
 import os
 import re
-from .imap_functions import sort_folders, message_list, get_msg_body, get_id_list, move_msg_to_trash
+from .imap_functions import sort_folders, message_list, get_msg_body, get_id_list, move_msg_to_trash, move_msg
 
 # Load environment vars
 env_path = Path('.') / '.env'
@@ -233,7 +233,7 @@ def trash():
 	msg_num = request.form.get("msg_num")
 	folder = request.form.get("folder")
 
-	if bool(msg_num) != True:
+	if bool(msg_num) != True or bool(folder) != True:
 		full_url = url_for('.home')
 		return redirect(full_url)
 	else:
@@ -261,9 +261,36 @@ def trash():
 		imap.logout()
 
 
+@pages.route("/move", methods=['GET'])
+@login_required
+def msg_move():
+	msg_num = request.args.get('msg_num', type = int) 
+	src_folder = request.args.get("src_folder", type  = str)
+	dst_folder = request.args.get("dst_folder", type = str)
 
+	if bool(msg_num) != True or bool(src_folder) != True or bool(dst_folder) != True:
+		flash("Error!", category='error')
+		full_url = url_for('.home')
+		return redirect(full_url)
+	elif src_folder == dst_folder:
+		flash("You can't move a message to the folder its already in.", category='error')
+		full_url = url_for('.home')
+		return redirect(full_url)
+	else:
+		print(msg_num)
+		print(src_folder)
+		print(dst_folder)
 
+		imap = use_imap()
 
+		result = move_msg(imap, msg_num, src_folder, dst_folder)
+		if result == True:
+			flash(f"Message moved to {dst_folder}!", category='success')
+			return redirect(f"/home?folder={src_folder}")
+		else:
+			flash("Error moving message!", category='error')
+			return redirect(f"/home?folder={src_folder}")
+	
 
 
 

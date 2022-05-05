@@ -93,8 +93,16 @@
 				<form action="/delete" method="POST">
 					<input type="hidden" name="folder" value="{{request.args.get('folder')}}">
 					<input type="hidden" name="msg_num" value="{{request.args.get('msg_num')}}">
-					<button type="submit" class="btn btn-primary mb-1 me-1">Delete</button>
+					<button type="submit" class="btn btn-danger mb-1 me-1">Delete</button>
 				</form>
+				<div class="dropdown">
+					<button class="btn btn-primary dropdown-toggle mb-1 me-1" name="dst_folder" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">Move To</button>
+					<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+						{% for key, value in sorted_folders.items() %}
+						<li><a class="dropdown-item" href="/move?msg_num={{request.args.get('msg_num')}}&src_folder={{request.args.get('folder')}}&dst_folder={{key}}">{{key}}</a></li>
+						{% endfor %}
+					</ul>
+				</div>
 			</div>
 		</div>
 		<div id="invisible-container" class="container-fluid">
