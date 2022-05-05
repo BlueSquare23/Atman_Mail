@@ -78,3 +78,14 @@ python app.py
 * CSS: [Bootstrap](https://getbootstrap.com/docs/5.0/getting-started/introduction/)
 * Protocol Modules: [smtplib](https://docs.python.org/3/library/smtplib.html), [imaplib](https://docs.python.org/3/library/imaplib.html)
 
+## License
+
+This work is licensed under a
+[Creative Commons Attribution 4.0 International License][cc-by].
+
+[![CC BY 4.0][cc-by-image]][cc-by]
+
+[cc-by]: http://creativecommons.org/licenses/by/4.0/
+[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
+
+#### Created by John R.
