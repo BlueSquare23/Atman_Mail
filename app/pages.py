@@ -94,14 +94,15 @@ def home():
 		body = "No messages in folder!"
 		num_pages = 1
 	else:
-		last_msg_num = int(get_id_list(imap, folder)[-1]) + 1
+		last_msg_num = int(get_id_list(imap, folder)[-1]) 
 
 		# Find page number from msg_num.
 		difference = last_msg_num - int(msg_num)
-		correct_page_num = int(difference / num_msg_per_page) + (difference % num_msg_per_page > 0)
+		correct_page_num = int(difference / num_msg_per_page) + 1
 
 		# If not on the right page change pages,
 		if int(page_num) != correct_page_num:
+			print("I Farted")
 			full_url = url_for('.home', page_num=correct_page_num, folder=folder, msg_num=msg_num)
 			imap.close()
 			imap.logout()
@@ -112,10 +113,15 @@ def home():
 		# Set messages list based off of page_num and msg_num.
 
 		# Round up integer division to get number pages total.
+		print("-----------")
+		print("Last Msg Num: "+str(last_msg_num))
+		print("Num Msg Per Page: "+str(num_msg_per_page))
+		print("Last Msg Num % Num Msg Per Page: "+str(last_msg_num % num_msg_per_page))
+		print("-----------")
 		num_pages = int(last_msg_num / num_msg_per_page) + (last_msg_num % num_msg_per_page > 0)
 
 		# Magic pagination algorithm. Do not touch!
-		messages = message_list(imap, folder, range((last_msg_num - (num_msg_per_page * page_num)), (last_msg_num - ((page_num - 1) * num_msg_per_page))))
+		messages = message_list(imap, folder, range((last_msg_num - (num_msg_per_page * page_num) + 1), (last_msg_num - ((page_num - 1) * num_msg_per_page) + 1)))
 		body = get_msg_body(imap, msg_num, folder)
 
 # All messages on one page.
