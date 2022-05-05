@@ -87,11 +87,6 @@ def home():
 			imap.close()
 			imap.logout()
 			return redirect(full_url)
-			# Default to the latest message in the box.
-			#full_url = url_for('.home', msg_num=id_list[-1], **request.args)
-			#return redirect(full_url)
-
-	#print(get_msg_uid(imap, msg_num, folder))
 
 	# If there are no messages in the folder,
 	if get_id_list(imap, folder) == []:

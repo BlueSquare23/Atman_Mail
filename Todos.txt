@@ -1,3 +1,7 @@
+## Testing
+* Need some form of testing badly. Everything is a mess and one change breaks
+  everything. I keep accidentally committing broken code.
+
 ## New Feature
 * Make barebones settings page. Allow user to set things like:
 	- Delete button behavior (Move to trash vs just delete)

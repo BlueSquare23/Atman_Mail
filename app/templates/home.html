@@ -79,7 +79,7 @@
 					{% if cell|int != 0 %}
 				      {% set ns.msg_num = cell %}
 					{% endif %}
-				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}">{{cell|string|truncate(20)}}</a></td>
+				  <td><a href="/home?msg_num={{ns.msg_num}}&folder={{ request.args.get('folder') }}&page_num={{ request.args.get('page_num') }}">{{cell|string|truncate(20)}}</a></td>
 				{% endfor %}
 			    </tr>
 			{% endfor %}
