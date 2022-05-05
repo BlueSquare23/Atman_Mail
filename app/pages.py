@@ -67,7 +67,7 @@ def home():
 	# If page_num is unspecified,
 	if bool(page_num) != True:
 		# Go to first page,
-		full_url = url_for('.home', page_num=1, **request.args)
+		full_url = url_for('.home', page_num=1, folder=folder)
 		imap.close()
 		imap.logout()
 		return redirect(full_url)
@@ -83,7 +83,7 @@ def home():
 
 			top_msg_on_page = int(id_list[-1]) - (num_msg_per_page * page_num) + num_msg_per_page
 			print(top_msg_on_page)
-			full_url = url_for('.home', msg_num=top_msg_on_page, **request.args)
+			full_url = url_for('.home', msg_num=top_msg_on_page, folder=folder, page_num=page_num)
 			imap.close()
 			imap.logout()
 			return redirect(full_url)
@@ -162,14 +162,10 @@ def send():
 			s.quit()
 			flash("Message Sent!", category='success')
 			full_url = url_for('.home')
-			imap.close()
-			imap.logout()
 			return redirect(full_url)
 		except:
 			flash("Sending Failed!", category='error')
 			full_url = url_for('.send')
-			imap.close()
-			imap.logout()
 			return redirect(full_url)
 	else:
 		# GET parameters
@@ -227,6 +223,8 @@ def send():
 
 		return render_template("send.html", user=current_user, body=body, to_addr=to_addr, subject=subject)
 
+######### Delete Page #########
+
 @pages.route("/delete", methods=['POST'])
 @login_required
 def trash():
@@ -260,6 +258,7 @@ def trash():
 		imap.close()
 		imap.logout()
 
+######### Move Page #########
 
 @pages.route("/move", methods=['GET'])
 @login_required
