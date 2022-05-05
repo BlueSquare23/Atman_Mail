@@ -90,7 +90,11 @@
 			<div class="d-flex justify-content-center">
 				<a class="btn btn-primary mb-1 me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=reply" role="button">Reply</a>
 				<a class="btn btn-primary mb-1 me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=forward" role="button">Forward</a>
-				<a class="btn btn-primary mb-1 me-1" href="#" role="button">Delete</a>
+				<form action="/delete" method="POST">
+					<input type="hidden" name="folder" value="{{request.args.get('folder')}}">
+					<input type="hidden" name="msg_num" value="{{request.args.get('msg_num')}}">
+					<button type="submit" class="btn btn-primary mb-1 me-1">Delete</button>
+				</form>
 			</div>
 		</div>
 		<div id="invisible-container" class="container-fluid">

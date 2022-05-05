@@ -11,7 +11,7 @@ import imaplib
 import email
 import os
 import re
-from .imap_functions import sort_folders, message_list, get_msg_body, get_id_list
+from .imap_functions import sort_folders, message_list, get_msg_body, get_id_list, move_msg_to_trash
 
 # Load environment vars
 env_path = Path('.') / '.env'
@@ -37,12 +37,15 @@ def use_imap():
 	
 	return imap
 
+######### Home Page #########
+
 @pages.route("/", methods=['GET'])
 @pages.route("/home", methods=['GET'])
 @login_required
 def home():
 
 	imap = use_imap()
+	print(type(imap))
 
 	# GET parameters
 	msg_num = request.args.get('msg_num', type = int)
@@ -57,12 +60,16 @@ def home():
 	if bool(folder) != True:
 		# Default to loading the INBOX.
 		full_url = url_for('.home', folder="INBOX", **request.args)
+		imap.close()
+		imap.logout()
 		return redirect(full_url)
 
 	# If page_num is unspecified,
 	if bool(page_num) != True:
 		# Go to first page,
 		full_url = url_for('.home', page_num=1, **request.args)
+		imap.close()
+		imap.logout()
 		return redirect(full_url)
 	
 	# If the msg_num is unspecified, 
@@ -77,11 +84,14 @@ def home():
 			top_msg_on_page = int(id_list[-1]) - (num_msg_per_page * page_num) + num_msg_per_page
 			print(top_msg_on_page)
 			full_url = url_for('.home', msg_num=top_msg_on_page, **request.args)
+			imap.close()
+			imap.logout()
 			return redirect(full_url)
 			# Default to the latest message in the box.
 			#full_url = url_for('.home', msg_num=id_list[-1], **request.args)
 			#return redirect(full_url)
 
+	#print(get_msg_uid(imap, msg_num, folder))
 
 	# If there are no messages in the folder,
 	if get_id_list(imap, folder) == []:
@@ -98,6 +108,8 @@ def home():
 		# If not on the right page change pages,
 		if int(page_num) != correct_page_num:
 			full_url = url_for('.home', page_num=correct_page_num, folder=folder, msg_num=msg_num)
+			imap.close()
+			imap.logout()
 			return redirect(full_url)
 
 		# By this point the page_num, and msg_num should be set correctly.
@@ -115,7 +127,11 @@ def home():
 #		messages = message_list(imap, folder, get_id_list(imap))
 #		body = get_msg_body(msg_num)
 
-	return render_template("home.html", user=current_user, sorted_folders=sort_folders(imap), messages=messages, body=body, num_pages=num_pages)
+	sorted_folders = sort_folders(imap)
+
+	return render_template("home.html", user=current_user, sorted_folders=sorted_folders, messages=messages, body=body, num_pages=num_pages)
+
+######### Send Page #########
 
 @pages.route("/send", methods=['GET', 'POST'])
 @login_required
@@ -146,10 +162,14 @@ def send():
 			s.quit()
 			flash("Message Sent!", category='success')
 			full_url = url_for('.home')
+			imap.close()
+			imap.logout()
 			return redirect(full_url)
 		except:
 			flash("Sending Failed!", category='error')
 			full_url = url_for('.send')
+			imap.close()
+			imap.logout()
 			return redirect(full_url)
 	else:
 		# GET parameters
@@ -201,4 +221,53 @@ def send():
 
 				body = '\n\n' + '\n'.join(results)
 
+
+			imap.close()
+			imap.logout()
+
 		return render_template("send.html", user=current_user, body=body, to_addr=to_addr, subject=subject)
+
+@pages.route("/delete", methods=['POST'])
+@login_required
+def trash():
+	msg_num = request.form.get("msg_num")
+	folder = request.form.get("folder")
+
+	if bool(msg_num) != True:
+		full_url = url_for('.home')
+		return redirect(full_url)
+	else:
+		imap = use_imap()
+		response = move_msg_to_trash(imap, msg_num, folder)
+		if response == "Trashed":
+			flash("Message moved to Trash!", category='success')
+			full_url = url_for('.home', folder=folder)
+			imap.close()
+			imap.logout()
+			return redirect(full_url)
+		elif response == "Deleted":
+			flash("Message Permanently Deleted!", category='success')
+			full_url = url_for('.home', folder=folder)
+			imap.close()
+			imap.logout()
+			return redirect(full_url)
+		else:
+			flash("Error!", category='error')
+			full_url = url_for('.home', folder=folders)
+			imap.close()
+			imap.logout()
+			return redirect(full_url)
+		imap.close()
+		imap.logout()
+
+
+
+
+
+
+
+
+
+
+
+

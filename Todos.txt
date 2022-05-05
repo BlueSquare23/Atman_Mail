@@ -1,5 +1,6 @@
 ## Frontend
 * Make textbox num rows sames as num lines in {{body}} text up to ~20 rows. 
+* Make "go to msg number" box on total pages bar.
 
 ## Backend
 * Add try, excepts around SMTP/IMAP connection logic.

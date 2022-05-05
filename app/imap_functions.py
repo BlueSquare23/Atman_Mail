@@ -2,6 +2,52 @@ import ssl
 from email.message import EmailMessage
 import email
 
+def check_for_trash_folder(imap):
+	resp_code, directories = imap.list()
+
+	print("IMAP List Response Code : {}".format(resp_code))
+
+	for directory in directories:
+		print(directory.decode('utf-8'))
+		directory_name = directory.decode().split('"')[-1].strip()
+		if directory_name == "INBOX.Trash":
+			print("Has Trash Folder!")
+			return True
+
+	return False
+
+def delete_msg(imap, msg_num):
+		resp_code, response = imap.store(str(msg_num), '+FLAGS', '\\Deleted')
+		print("Response Code : {}".format(resp_code))
+		print("Response      : {}\n".format(response[0].decode()))
+
+		resp_code, response = imap.expunge()
+		print("Response Code : {}".format(resp_code))
+		print("Response      : {}\n".format(response[0].decode()))
+
+def move_msg_to_trash(imap, msg_num, folder):
+	if check_for_trash_folder(imap) == True:
+		print("Fart!")
+
+		imap.select(mailbox=folder, readonly=False)
+
+		# Delete message if already in trash.
+		if folder == "INBOX.Trash":
+			delete_msg(imap, msg_num)
+			return "Deleted"
+		# Otherwise move message to the trash and then delete from current
+		# folder.
+		else:
+			resp_code, response = imap.copy(str(msg_num), "INBOX.Trash")
+			print("Response Code : {}".format(resp_code))
+			print("Response      : {}".format(response[0].decode()))
+			
+			delete_msg(imap, msg_num)
+
+			return "Trashed"
+	else:
+		return False
+
 def sort_folders(imap):
 	# List directories
 	resp_code, directories = imap.list()
