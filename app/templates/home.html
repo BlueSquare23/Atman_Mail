@@ -3,40 +3,7 @@
 
 {% block content %}
 
-<div class="container-md">
-<div class="bg-dark border border-secondary">
-		<b style="color: white">&nbsp;Total Pages: {{num_pages}}</b>
-
-<nav aria-label="pagination page numbering">
-  <ul class="pagination justify-content-center">
-	{% if (request.args.get('page_num')|int - 1) >= 1 %}
-    <li class="page-item">
-      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>
-	{% endif %}
-	{% if (request.args.get('page_num')|int - 1) >= 1 %}
-    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int - 1}}</a></li>
-	{% endif %}
-	<li class="page-item active" aria-current="page">
-    <a class="page-link" href="/home?page_num={{request.args.get('page_num')}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')}}</a>
-	</li>
-	
-	{% if (request.args.get('page_num')|int + 1) <= num_pages %}
-    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int + 1}}</a></li>
-	{% endif %}
-	{% if (request.args.get('page_num')|int + 1) <= num_pages %}
-    <li class="page-item">
-      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
-	{% endif %}
-  </ul>
-</nav>
-</div>
-</div>
+{% include 'pagination.html' %}
 
 <div id="invisible-container" class="container-fluid">
 </div>
@@ -75,7 +42,7 @@
 		{% endif %}
 		<div class="col-xl-9 " style="height: 0%">
 				<textarea class="bg-dark border border-secondary" style="width: 100%; height: 100%; color: white; padding: 5px" rows="{{ns.row_num}}" readonly>{{body}}</textarea>
-			<div class="bg-dark border border-secondary py-1">
+			<div class="bg-dark border border-secondary py-1 mt-2">
 				<div class="d-flex justify-content-center">
 					<a class="btn btn-primary me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=reply" role="button">Reply</a>
 					<a class="btn btn-primary me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=forward" role="button">Forward</a>
@@ -94,12 +61,8 @@
 					</div>
 				</div>
 			</div>
+		<div id="invisible-container" class="container-fluid">
 		</div>
-	</div>
-	<div id="invisible-container" class="container-fluid">
-	</div>
-	<div class="row justify-content-end">
-		<div class="col-xl-9">
 			<div class="table-responsive-lg">
 			<table class="table table-hover table-dark table-bordered table-condensed border-secondary">
 	  		<thead>
@@ -128,4 +91,10 @@
 		</div>
 	</div>
 </div>
+
+{% include 'pagination.html' %}
+
+<div id="invisible-container" class="container-fluid">
+</div>
+
 {% endblock %}

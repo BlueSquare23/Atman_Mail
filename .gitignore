@@ -2,5 +2,6 @@
 *.db
 *.bak
 *.misc
+*.swp
 venv/
 __pycache__/
