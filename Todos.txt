@@ -9,7 +9,6 @@
 * When you refresh after getting a new message it gives a new message alert.
 
 ## Frontend
-* Make textbox num rows sames as num lines in {{body}} text up to ~20 rows. 
 * Make "go to msg number" box on total pages bar.
 
 ## Backend

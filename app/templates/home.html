@@ -61,8 +61,20 @@
 			{% endfor %}
 			</table>
 		</div>
+
+		{% set num_body_lines = body.count('\n') %}
+
+		<!-- Default Lowerbound -->
+		{% set ns = namespace (row_num = 10) %}
+
+		{% if num_body_lines > 10 and num_body_lines < 25 %}
+			{% set ns.row_num = body.count('\n') %}
+		<!-- Default Upperbound -->
+		{% elif num_body_lines > 25 %}
+			{% set ns.row_num = 25 %}
+		{% endif %}
 		<div class="col-xl-9 " style="height: 0%">
-			<textarea class="bg-dark border border-secondary" style="width: 100%; height: 80%; color: white; padding: 5px" rows="15" readonly>{{body}}</textarea>
+				<textarea class="bg-dark border border-secondary" style="width: 100%; height: 100%; color: white; padding: 5px" rows="{{ns.row_num}}" readonly>{{body}}</textarea>
 			<div class="bg-dark border border-secondary py-1">
 				<div class="d-flex justify-content-center">
 					<a class="btn btn-primary me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=reply" role="button">Reply</a>
