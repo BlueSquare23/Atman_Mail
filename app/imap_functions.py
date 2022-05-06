@@ -51,13 +51,13 @@ def move_msg(imap, msg_num, src_folder, dst_folder):
 		return False
 	
 
-def move_msg_to_trash(imap, msg_num, folder):
+def move_msg_to_trash(imap, msg_num, folder, del_pref):
 	if check_for_trash_folder(imap) == True:
 
 		imap.select(mailbox=folder, readonly=False)
 
 		# Delete message if already in trash.
-		if folder == "INBOX.Trash" or folder == "INBOX.Drafts":
+		if folder == "INBOX.Trash" or folder == "INBOX.Drafts" or del_pref == "delete":
 			delete_msg(imap, msg_num)
 			return "Deleted"
 		# Otherwise move message to the trash and then delete from current

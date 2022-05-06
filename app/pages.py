@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, url_for, redirect
 from flask_login import login_required, current_user
-from .models import User
+from .models import User, Settings
 from . import db
 import smtplib 
 import time
@@ -21,6 +21,7 @@ load_dotenv(dotenv_path=env_path)
 PASS = os.environ['PASS'] 
 
 pages = Blueprint("pages", __name__)
+
 
 def use_imap():
 	# Connection settings.
@@ -45,6 +46,17 @@ def use_imap():
 @login_required
 def home():
 
+	# Settings obj
+	if Settings.query.first() is None:
+		settings = Settings(del_button_behavior="trash", num_msg_per_page=10)
+		db.session.add(settings)
+		db.session.commit()
+	
+	settings = Settings.query.first()
+
+	# num_msg_per_page Messages per page.
+	num_msg_per_page = settings.num_msg_per_page
+
 	imap = use_imap()
 	print(type(imap))
 
@@ -54,8 +66,6 @@ def home():
 	page_num = request.args.get('page_num', type = int)
 
 	# Handel if GET parameters are not supplied.
-	# num_msg_per_page Messages per page.
-	num_msg_per_page = 10
 
 	# If folder is not supplied,
 	if bool(folder) != True:
@@ -257,11 +267,53 @@ def send():
 
 		return render_template("send.html", user=current_user, body=body, to_addr=to_addr, subject=subject)
 
+
+######### Settings Page #########
+
+@pages.route("/settings", methods=['GET', 'POST'])
+@login_required
+def settings():
+	
+
+	if request.method == 'POST':
+		page = request.form.get("page")
+		num_msg_per_page = request.form.get("num_msg_per_page", type = int)
+		del_button_behavior = request.form.get("del_button_behavior")
+
+		if bool(page) == True and page == "general":
+			if bool(num_msg_per_page) != True or bool(del_button_behavior) != True:
+				flash("Settings Missing!", category='error')
+				return render_template("settings.html", user=current_user, page="general")
+			else:
+				Settings.query.first().del_button_behavior = del_button_behavior
+				Settings.query.first().num_msg_per_page = num_msg_per_page
+				db.session.commit()
+				flash('General Settings Updated!', category='success')
+				full_url = url_for('.settings', page="general")
+				return redirect(full_url)
+
+		print("Page: " + page)
+		print("Num Msg Per Page: " + str(num_msg_per_page))
+		print("Del Button Behavior: " + del_button_behavior)
+
+		return render_template("settings.html", user=current_user, page="general")
+	else:
+		page = request.args.get("page")
+
+		if bool(page) != True:
+			page = "general"
+
+
+		return render_template("settings.html", user=current_user, page="general")
+	
+
 ######### Delete Page #########
 
 @pages.route("/delete", methods=['POST'])
 @login_required
 def trash():
+	gen_settings = Settings.query.first()
+
 	msg_num = request.form.get("msg_num")
 	folder = request.form.get("folder")
 
@@ -270,7 +322,7 @@ def trash():
 		return redirect(full_url)
 	else:
 		imap = use_imap()
-		response = move_msg_to_trash(imap, msg_num, folder)
+		response = move_msg_to_trash(imap, msg_num, folder, del_pref=gen_settings.del_button_behavior)
 		if response == "Trashed":
 			flash("Message moved to Trash!", category='success')
 			full_url = url_for('.home', folder=folder)
@@ -323,8 +375,11 @@ def msg_move():
 		else:
 			flash("Error moving message!", category='error')
 			return redirect(f"/home?folder={src_folder}")
-	
 
+
+
+
+	
 
 
 

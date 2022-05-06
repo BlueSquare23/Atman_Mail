@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="container bg-dark border border-secondary p-2">
+
+{% if request.args.get('page') == "general" %}
+
+<h3 align="enter" style="color: white">
+	Ātman Settings
+</h3>
+<form method="POST" class="d-flex justify-content-center">
+	<input type="hidden" id="page" name="page" value="general">
+	<div class="form-group" style="color: white; width: 50%">
+		<label for="email">Number of Messages Per Page</label>
+		<input type="number" 
+			id="num_msg_per_page" 
+			name="num_msg_per_page" 
+			class="form-control"
+			value="10"
+		/>
+		<br/>
+		<label for="outgoing_hostname" style="color: white">Delete Button Behavior</label>
+		<div class="form-check">
+			<input class="form-check-input" type="radio" name="del_button_behavior" id="del_button_behavior" value="trash" checked>
+		  	<label class="form-check-label" for="flexRadioDefault1">
+		    Move To Trash
+		  	</label>
+		</div>
+		<div class="form-check">
+			<input class="form-check-input" type="radio" name="del_button_behavior" id="del_button_behavior" value="delete">
+			<label class="form-check-label" for="flexRadioDefault2">
+			Outright Delete &amp; Purge 
+			</label>
+		</div>
+
+		<br/>
+
+		<center>
+		<button class="btn btn-primary" 
+			type="submit">Submit
+		</button>
+		</center>		
+	</div>
+</form>
+
+<hr>
+<a style="center" class="btn btn-primary" href="/settings?page=connection">Connection Settings</a>
+
+{% elif request.args.get('page') == "connection" %}
+
+<h3 align="enter" style="color: white">
+	Ātman Settings
+</h3>
+<form method="POST">
+	<input type="hidden" id="page" name="page" value="connection">
+	<div class="form-group" style="color: white">
+		<label for="email">Email Address</label>
+		<input type="text" 
+			id="email" 
+			name="email" 
+			class="form-control"
+			placeholder="Enter Email Address"
+		/>
+
+		<label for="password1" style="color: white">Password</label>
+		<input type="password"
+			id="password1"
+			name="password1"
+			class="form-control"
+			placeholder="Enter Password"
+		/>
+
+		<label for="password2" style="color: white">Confirm Password</label>
+		<input type="password"
+			id="password2"
+			name="password2"
+			class="form-control"
+			placeholder="Retype Password"
+		/>
+
+		<label for="outgoing_hostname" style="color: white">Outgoing Mail Server Hostname</label>
+		<input type="text" 
+			id="outgoing_hostname" 
+			name="outgoing_hostname" 
+			class="form-control"
+			placeholder="Enter Outgoing Hostname"
+		/>
+
+		<label for="incoming_hostname" style="color: white">Incoming Mail Server Hostname</label>
+		<input type="text" 
+			id="incoming_hostname" 
+			name="incoming_hostname" 
+			class="form-control"
+			placeholder="Enter Incoming Hostname"
+		/>
+
+		<label for="smtp_port" style="color: white">Outgoing Mail Server Port (SMTP)</label>
+		<input type="number" 
+			id="smtp_port" 
+			name="smtp_port" 
+			class="form-control"
+			placeholder="Enter Outgoing Port"
+		/>
+
+		<label for="imap_port" style="color: white">Incoming Mail Server Port (IMAP)</label>
+		<input type="number" 
+			id="imap_port" 
+			name="imap_port" 
+			class="form-control"
+			placeholder="Enter Incoming Port"
+		/>
+
+		<br/>
+
+		<center>
+		<button class="btn btn-primary" 
+			type="submit">Submit
+		</button>
+		</center>		
+	</div>
+</form>
+
+<hr>
+<a style="center" class="btn btn-primary" href="/settings?page=general">General Settings</a>
+
+{% endif %}
+</div>
+
+{% endblock %}

@@ -38,6 +38,7 @@
 					<a class="nav-item nav-link" href="/home">Home</a>
 					{% if user.is_authenticated %}
 					<a class="nav-item nav-link" href="/send">Send Message</a>
+					<a class="nav-item nav-link" href="/settings?page=general">Settings</a>
 					<a class="nav-item nav-link" href="/logout">Logout</a>
 					{% else %}
 					<a class="nav-item nav-link" href="/login">Login</a>

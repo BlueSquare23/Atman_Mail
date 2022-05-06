@@ -13,6 +13,7 @@
 
 ## Backend
 * Add try, excepts around SMTP/IMAP connection logic.
+* Break User and Connection Settings out into two different db tables.
 
 ## Incomming
 * Make imap settings check function.
