@@ -42,7 +42,7 @@
 </div>
 
 <div class="container">
-	<div class="row justify-content-md-center">
+	<div class="row justify-content-end">
 		<div class="col-xl-3">
 			<table class="table table-hover table-dark table-bordered table-condensed border-secondary sticky-lg-top" style="top: 20px">
 			  <thead>
@@ -61,10 +61,37 @@
 			{% endfor %}
 			</table>
 		</div>
-		<div class="col-sm">
+		<div class="col-xl-9 " style="height: 0%">
+			<textarea class="bg-dark border border-secondary" style="width: 100%; height: 80%; color: white; padding: 5px" rows="15" readonly>{{body}}</textarea>
+			<div class="bg-dark border border-secondary py-1">
+				<div class="d-flex justify-content-center">
+					<a class="btn btn-primary me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=reply" role="button">Reply</a>
+					<a class="btn btn-primary me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=forward" role="button">Forward</a>
+					<form action="/delete" method="POST">
+						<input type="hidden" name="folder" value="{{request.args.get('folder')}}">
+						<input type="hidden" name="msg_num" value="{{request.args.get('msg_num')}}">
+						<button type="submit" class="btn btn-danger me-1">Delete</button>
+					</form>
+					<div class="dropdown">
+						<button class="btn btn-primary dropdown-toggle me-1" name="dst_folder" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">Move To</button>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+							{% for key, value in sorted_folders.items() %}
+							<li><a class="dropdown-item" href="/move?msg_num={{request.args.get('msg_num')}}&src_folder={{request.args.get('folder')}}&dst_folder={{key}}">{{key}}</a></li>
+							{% endfor %}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="invisible-container" class="container-fluid">
+	</div>
+	<div class="row justify-content-end">
+		<div class="col-xl-9">
+			<div class="table-responsive-lg">
 			<table class="table table-hover table-dark table-bordered table-condensed border-secondary">
-			  <thead>
-			    <tr>
+	  		<thead>
+				<tr>
 			      <th scope="col" title="Message Number">Index</th>
 			      <th scope="col" title="From">From</th>
 			      <th scope="col" title="Subject">Subject</th>
@@ -84,28 +111,8 @@
 			    </tr>
 			{% endfor %}
 			  </tbody>
-		</div>
-		<div class="col-sm bg-dark border border-secondary">
-			<textarea class="bg-dark border border-secondary" style="width: 100%; height: 100%; color: white; padding: 5px" rows="15" readonly>{{body}}</textarea>
-			<div class="d-flex justify-content-center">
-				<a class="btn btn-primary mb-1 me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=reply" role="button">Reply</a>
-				<a class="btn btn-primary mb-1 me-1" href="/send?msg_num={{request.args.get('msg_num')}}&folder={{request.args.get('folder')}}&mode=forward" role="button">Forward</a>
-				<form action="/delete" method="POST">
-					<input type="hidden" name="folder" value="{{request.args.get('folder')}}">
-					<input type="hidden" name="msg_num" value="{{request.args.get('msg_num')}}">
-					<button type="submit" class="btn btn-danger mb-1 me-1">Delete</button>
-				</form>
-				<div class="dropdown">
-					<button class="btn btn-primary dropdown-toggle mb-1 me-1" name="dst_folder" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">Move To</button>
-					<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-						{% for key, value in sorted_folders.items() %}
-						<li><a class="dropdown-item" href="/move?msg_num={{request.args.get('msg_num')}}&src_folder={{request.args.get('folder')}}&dst_folder={{key}}">{{key}}</a></li>
-						{% endfor %}
-					</ul>
-				</div>
+			</table>
 			</div>
-		</div>
-		<div id="invisible-container" class="container-fluid">
 		</div>
 	</div>
 </div>

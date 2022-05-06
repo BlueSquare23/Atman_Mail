@@ -6,23 +6,19 @@
 * Make barebones settings page. Allow user to set things like:
 	- Delete button behavior (Move to trash vs just delete)
 	- Number of messages per page.
+* When you refresh after getting a new message it gives a new message alert.
 
 ## Frontend
 * Make textbox num rows sames as num lines in {{body}} text up to ~20 rows. 
 * Make "go to msg number" box on total pages bar.
-* Make top button not appear until screen scrolled down.
 
 ## Backend
 * Add try, excepts around SMTP/IMAP connection logic.
 
-
 ## Incomming
 * Make imap settings check function.
 	- Pipe back to setup route.
-* Add message toolbar for reply, forward, delete, ect.
-* Add ability to move messages to different folder.
 
 ## Outgoing
-* Add, "save as draft" button to send page.
 * Add ability to attach file to a message.
 * Add ability to add CC and BCC.

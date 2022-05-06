@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from .models import User
 from . import db
 import smtplib 
+import time
 import ssl
 from email.message import EmailMessage
 from pathlib import Path
@@ -141,6 +142,7 @@ def send():
 		to_addr = request.form.get("to_addr")
 		subject = request.form.get("subject")
 		body = request.form.get("body")
+		draft = request.form.get("draft")
 		from_addr = User.query.first().email
 		outgoing_hostname = User.query.first().outgoing_hostname
 		smtp_port = User.query.first().smtp_port
@@ -150,6 +152,19 @@ def send():
 		message["From"]    = from_addr
 		message["Subject"] = subject 
 		message.set_payload(body)
+
+		if bool(draft) == True:
+			imap = use_imap()
+			imap.select('INBOX.Drafts')
+			imap.append('INBOX.Drafts', '', imaplib.Time2Internaldate(time.time()), str(message).encode("utf-8"))
+			flash("Message saved to Drafts.", category='success')
+			imap.close()
+			imap.logout()
+
+			full_url = url_for('.home')
+			return redirect(full_url)
+
+
 
 		if smtp_port == 465:
 			s = smtplib.SMTP_SSL(outgoing_hostname, smtp_port)
@@ -181,10 +196,11 @@ def send():
 		else:
 			imap = use_imap()
 			body = get_msg_body(imap, msg_num, folder)
+			print("#############  Message Body")
 
 			# Get subject.
 			subject_line = body.split('\n', 3)[2]
-			subject = subject_line.split(":",1)[1] 
+			subject = subject_line.split(":",1)[1].strip()
 
 			# Reformat body text.
 			if mode == "reply":
@@ -192,22 +208,39 @@ def send():
 				from_line = body.partition('\n')[0]
 				from_addr = re.search(r'[\w.+-]+@[\w-]+\.[\w.-]+', from_line).group(0)
 				to_addr = from_addr
+				if folder == "INBOX.Drafts":
+					new_body_list = []
+					should_append = False
+					for line in body.splitlines():
+						if should_append == True:
+							new_body_list.append(line)
+						if "Subject" in line:
+							should_append = True
 
-				subject = "Re:" + subject
+					# First line after "Subject:" is always a space.
+					new_body_list.pop(0)
 
-				results = []
-				results.append("> --------------- Original Message ---------------")
-				results.append("> ")
+					body = '\n'.join(new_body_list)
 
-				# Add leading > Chars to body.
-				for line in body.split('\n'):
-					results.append("> " + line)
+					# Delete message from drafts.
+					move_msg_to_trash(imap, msg_num, folder)
+					flash("Message removed from Drafts!", category='success')
+				else:
+					subject = "Re: " + subject
 
-				body = '\n\n' + '\n'.join(results)
+					results = []
+					results.append("> --------------- Original Message ---------------")
+					results.append("> ")
+
+					# Add leading > Chars to body.
+					for line in body.split('\n'):
+						results.append("> " + line)
+
+					body = '\n\n' + '\n'.join(results)
 
 			elif mode == "forward":
 				to_addr = None
-				subject = "Fwd:" + subject
+				subject = "Fwd: " + subject
 
 				results = []
 				results.append("--------------- Original Message ---------------")
@@ -273,7 +306,7 @@ def msg_move():
 		full_url = url_for('.home')
 		return redirect(full_url)
 	elif src_folder == dst_folder:
-		flash("You can't move a message to the folder its already in.", category='error')
+		flash(f"Message already in {src_folder}!", category='error')
 		full_url = url_for('.home')
 		return redirect(full_url)
 	else:

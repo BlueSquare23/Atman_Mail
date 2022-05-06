@@ -53,12 +53,11 @@ def move_msg(imap, msg_num, src_folder, dst_folder):
 
 def move_msg_to_trash(imap, msg_num, folder):
 	if check_for_trash_folder(imap) == True:
-		print("Fart!")
 
 		imap.select(mailbox=folder, readonly=False)
 
 		# Delete message if already in trash.
-		if folder == "INBOX.Trash":
+		if folder == "INBOX.Trash" or folder == "INBOX.Drafts":
 			delete_msg(imap, msg_num)
 			return "Deleted"
 		# Otherwise move message to the trash and then delete from current
@@ -115,6 +114,7 @@ def message_list(imap, folder, id_list):
 	return messages
 
 def get_msg_body(imap, msg_num, folder):
+	imap.select(str(folder), readonly=True)
 	resp_code, msg_data = imap.fetch(str(msg_num), '(RFC822)') ## Fetch mail data.
 	for response_part in msg_data:
 		if isinstance(response_part, tuple):
