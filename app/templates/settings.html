@@ -17,18 +17,18 @@
 			id="num_msg_per_page" 
 			name="num_msg_per_page" 
 			class="form-control"
-			value="10"
+			value="{{num_msg_per_page}}"
 		/>
 		<br/>
 		<label for="outgoing_hostname" style="color: white">Delete Button Behavior</label>
 		<div class="form-check">
-			<input class="form-check-input" type="radio" name="del_button_behavior" id="del_button_behavior" value="trash" checked>
+				<input class="form-check-input" type="radio" name="del_button_behavior" id="del_button_behavior" value="trash" {% if del_button_behavior == "trash" %}checked{% endif %}>
 		  	<label class="form-check-label" for="flexRadioDefault1">
 		    Move To Trash
 		  	</label>
 		</div>
 		<div class="form-check">
-			<input class="form-check-input" type="radio" name="del_button_behavior" id="del_button_behavior" value="delete">
+			<input class="form-check-input" type="radio" name="del_button_behavior" id="del_button_behavior" value="delete" {% if del_button_behavior == "delete" %}checked{% endif %}>
 			<label class="form-check-label" for="flexRadioDefault2">
 			Outright Delete &amp; Purge 
 			</label>

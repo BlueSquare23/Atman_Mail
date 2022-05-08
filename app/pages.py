@@ -273,7 +273,10 @@ def send():
 @pages.route("/settings", methods=['GET', 'POST'])
 @login_required
 def settings():
-	
+	gen_settings = Settings.query.first()
+
+	num_msg_per_page = gen_settings.num_msg_per_page
+	del_button_behavior = gen_settings.del_button_behavior
 
 	if request.method == 'POST':
 		page = request.form.get("page")
@@ -296,7 +299,7 @@ def settings():
 		print("Num Msg Per Page: " + str(num_msg_per_page))
 		print("Del Button Behavior: " + del_button_behavior)
 
-		return render_template("settings.html", user=current_user, page="general")
+		return render_template("settings.html", user=current_user, page="general", num_msg_per_page=num_msg_per_page, del_button_behavior=del_button_behavior)
 	else:
 		page = request.args.get("page")
 
@@ -304,7 +307,7 @@ def settings():
 			page = "general"
 
 
-		return render_template("settings.html", user=current_user, page="general")
+		return render_template("settings.html", user=current_user, page="general", num_msg_per_page=num_msg_per_page, del_button_behavior=del_button_behavior)
 	
 
 ######### Delete Page #########

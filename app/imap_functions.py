@@ -113,19 +113,24 @@ def message_list(imap, folder, id_list):
 
 	return messages
 
+def get_msg_body_string(msg):
+	msg_string_header = f"From: {msg['from']}\nDate: {msg['date']}\nSubject: {msg['subject']}\n\n"
+	
+	if msg.get_content_type() == "text/plain":
+		return msg_string_header + msg.get_payload()
+
+	for parte in msg.walk():
+		if parte.get_content_type() == "text/plain":
+			return msg_string_header + str(parte)
+
 def get_msg_body(imap, msg_num, folder):
 	imap.select(str(folder), readonly=True)
 	resp_code, msg_data = imap.fetch(str(msg_num), '(RFC822)') ## Fetch mail data.
 	for response_part in msg_data:
 		if isinstance(response_part, tuple):
-			msg = email.message_from_bytes(response_part[1])
-			if msg.get_content_type() == "text/plain":
-				return "From: " + str(msg['from']) + "\n" + "Date: " + str(msg['date']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + msg.get_payload()
-			else:
-				for part in msg.walk():
-					print(part.get_content_type())
-					if part.get_content_type() == "text/plain":
-						return "From: " + str(msg['from']) + "\n" + "Date: " + str(msg['date']) + "\n" + "Subject: " + str(msg['subject']) + "\n\n" + str(part)
+			msg_bytes = response_part[1]
+			msg = email.message_from_bytes(msg_bytes)
+			return get_msg_body_string(msg)
 
 def get_id_list(imap, folder):
 	# Select all mailbox information.

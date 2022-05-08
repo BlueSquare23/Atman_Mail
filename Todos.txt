@@ -3,17 +3,20 @@
   everything. I keep accidentally committing broken code.
 
 ## New Feature
-* Make barebones settings page. Allow user to set things like:
-	- Delete button behavior (Move to trash vs just delete)
-	- Number of messages per page.
-* When you refresh after getting a new message it gives a new message alert.
+* Finish adjust connection settings pages and backend logic.
+* When you refresh after getting a new message it gives a "new message" alert.
+* Ability to see richly formatted messages and attachments in view msg window.
+* Add ability to have more than one user account. 
 
 ## Frontend
 * Make "go to msg number" box on total pages bar.
 
 ## Backend
 * Add try, excepts around SMTP/IMAP connection logic.
+	- Pipe back to connection settings.
+		- Maybe make test connection button.
 * Break User and Connection Settings out into two different db tables.
+	- See connection settings new feature.
 
 ## Incomming
 * Make imap settings check function.
