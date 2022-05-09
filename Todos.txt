@@ -3,13 +3,13 @@
   everything. I keep accidentally committing broken code.
 
 ## New Feature
-* Finish adjust connection settings pages and backend logic.
+* Finish adjusting connection settings pages and associated backend logic.
+	- Separate out connection and user settings.
 * When you refresh after getting a new message it gives a "new message" alert.
 * Ability to see richly formatted messages and attachments in view msg window.
 * Add ability to have more than one user account. 
 
 ## Frontend
-* Make "go to msg number" box on total pages bar.
 
 ## Backend
 * Add try, excepts around SMTP/IMAP connection logic.
@@ -17,8 +17,12 @@
 		- Maybe make test connection button.
 * Break User and Connection Settings out into two different db tables.
 	- See connection settings new feature.
+* Apply puddy and sand down rough edges.
+	- Ie. Validate all user input and make sure app responds with appropriate
+	  302, 403, 404, and 200 codes.
+		- Testing will help with this.
 
-## Incomming
+## Incoming
 * Make imap settings check function.
 	- Pipe back to setup route.
 

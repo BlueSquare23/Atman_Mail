@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from . import db
-from .models import User
+from .models import User, Connection
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -58,8 +58,10 @@ def setup():
 			flash('Password is too short.', category='error')
 		else:
 			# Add the new_user to the database, then redirect home
-			new_user = User(email=email, password=generate_password_hash(password1, method='sha256'), incoming_hostname=incoming_hostname, outgoing_hostname=outgoing_hostname, smtp_port=smtp_port, imap_port=imap_port)
+			new_user = User(email=email, password=generate_password_hash(password1, method='sha256')) 
+			new_connection = Connection(incoming_hostname=incoming_hostname, outgoing_hostname=outgoing_hostname, smtp_port=smtp_port, imap_port=imap_port)
 			db.session.add(new_user)
+			db.session.add(new_connection)
 			db.session.commit()
 
 			# Write password to .env file.

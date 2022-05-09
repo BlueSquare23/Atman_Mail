@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, flash, url_for, redirect
 from flask_login import login_required, current_user
-from .models import User, Settings
+from .models import User, Settings, Connection
 from . import db
 import smtplib 
 import time
 import ssl
+import sys
 from email.message import EmailMessage
 from pathlib import Path
 from dotenv import load_dotenv
@@ -25,7 +26,7 @@ pages = Blueprint("pages", __name__)
 
 def use_imap():
 	# Connection settings.
-	imap_host = User.query.first().outgoing_hostname
+	imap_host = Connection.query.first().outgoing_hostname
 	imap_user = User.query.first().email
 	imap_pass = PASS
 
@@ -34,10 +35,18 @@ def use_imap():
 	imap.starttls()
 	
 	# Auth to the server.
+#	try:
 	imap.login(imap_user, imap_pass)
 	imap.select()
-	
+#		return imap
+#	except:
+#		exception = sys.exc_info()[0]
+#		print(type(exception))
+#
 	return imap
+	
+
+
 
 ######### Home Page #########
 
@@ -45,8 +54,7 @@ def use_imap():
 @pages.route("/home", methods=['GET'])
 @login_required
 def home():
-
-	# Settings obj
+	# Settings db object.
 	if Settings.query.first() is None:
 		settings = Settings(del_button_behavior="trash", num_msg_per_page=10)
 		db.session.add(settings)
@@ -58,7 +66,9 @@ def home():
 	num_msg_per_page = settings.num_msg_per_page
 
 	imap = use_imap()
-	print(type(imap))
+	print("------------")
+	print(imap)
+	print("------------")
 
 	# GET parameters
 	msg_num = request.args.get('msg_num', type = int)
@@ -143,6 +153,8 @@ def home():
 
 	return render_template("home.html", user=current_user, sorted_folders=sorted_folders, messages=messages, body=body, num_pages=num_pages)
 
+
+
 ######### Send Page #########
 
 @pages.route("/send", methods=['GET', 'POST'])
@@ -153,9 +165,9 @@ def send():
 		subject = request.form.get("subject")
 		body = request.form.get("body")
 		draft = request.form.get("draft")
-		from_addr = User.query.first().email
-		outgoing_hostname = User.query.first().outgoing_hostname
-		smtp_port = User.query.first().smtp_port
+		from_addr = Connection.query.first().email
+		outgoing_hostname = Connection.query.first().outgoing_hostname
+		smtp_port = Connection.query.first().smtp_port
 
 		message = EmailMessage()
 		message["To"]      = to_addr
@@ -173,8 +185,6 @@ def send():
 
 			full_url = url_for('.home')
 			return redirect(full_url)
-
-
 
 		if smtp_port == 465:
 			s = smtplib.SMTP_SSL(outgoing_hostname, smtp_port)
@@ -268,6 +278,7 @@ def send():
 		return render_template("send.html", user=current_user, body=body, to_addr=to_addr, subject=subject)
 
 
+
 ######### Settings Page #########
 
 @pages.route("/settings", methods=['GET', 'POST'])
@@ -310,6 +321,7 @@ def settings():
 		return render_template("settings.html", user=current_user, page="general", num_msg_per_page=num_msg_per_page, del_button_behavior=del_button_behavior)
 	
 
+
 ######### Delete Page #########
 
 @pages.route("/delete", methods=['POST'])
@@ -346,6 +358,8 @@ def trash():
 			return redirect(full_url)
 		imap.close()
 		imap.logout()
+
+
 
 ######### Move Page #########
 

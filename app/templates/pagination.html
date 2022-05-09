@@ -1,34 +1,51 @@
 <div class="container-md">
 <div class="bg-dark border border-secondary">
-		<b style="color: white">&nbsp;Total Pages: {{num_pages}}</b>
+	<b style="color: white">&nbsp;Total Pages: {{num_pages}}</b>
 
-<nav aria-label="pagination page numbering">
-  <ul class="pagination justify-content-center">
-	{% if (request.args.get('page_num')|int - 1) >= 1 %}
-    <li class="page-item">
-      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>
-	{% endif %}
-	{% if (request.args.get('page_num')|int - 1) >= 1 %}
-    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int - 1}}</a></li>
-	{% endif %}
-	<li class="page-item active" aria-current="page">
-    <a class="page-link" href="/home?page_num={{request.args.get('page_num')}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')}}</a>
-	</li>
-	
-	{% if (request.args.get('page_num')|int + 1) <= num_pages %}
-    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int + 1}}</a></li>
-	{% endif %}
-	{% if (request.args.get('page_num')|int + 1) <= num_pages %}
-    <li class="page-item">
-      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
-	{% endif %}
-  </ul>
-</nav>
+<div class="container">
+  <div class="row">
+    <div class="col">
+    </div>
+    <div class="col">
+		<nav aria-label="pagination page numbering">
+		  <ul class="pagination justify-content-center">
+			{% if (request.args.get('page_num')|int - 1) >= 1 %}
+		    <li class="page-item">
+		      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}" aria-label="Previous">
+		        <span aria-hidden="true">&laquo;</span>
+		      </a>
+		    </li>
+			{% endif %}
+			{% if (request.args.get('page_num')|int - 1) >= 1 %}
+		    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int - 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int - 1}}</a></li>
+			{% endif %}
+			<li class="page-item active" aria-current="page">
+		    <a class="page-link" href="/home?page_num={{request.args.get('page_num')}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')}}</a>
+			</li>
+			
+			{% if (request.args.get('page_num')|int + 1) <= num_pages %}
+		    <li class="page-item"><a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}">{{request.args.get('page_num')|int + 1}}</a></li>
+			{% endif %}
+			{% if (request.args.get('page_num')|int + 1) <= num_pages %}
+		    <li class="page-item">
+		      <a class="page-link" href="/home?page_num={{request.args.get('page_num')|int + 1}}&folder={{request.args.get('folder')}}" aria-label="Next">
+		        <span aria-hidden="true">&raquo;</span>
+		      </a>
+		    </li>
+			{% endif %}
+		  </ul>
+		</nav>
+    </div>
+    <div class="col">
+		<form method="GET" action="/home">
+		<div class="input-group mb-3">
+		  <button class="btn btn-outline-primary" type="submit" id="button-addon2">Go To Page</button>
+		  <input type="number" id="page_num" name="page_num" class="form-control" placeholder="Number" min="1" max="{{num_pages}}" aria-label="Page Number" aria-describedby="button-addon2">
+		</div>
+		</form>
+    </div>
+  </div>
+</div>
+
 </div>
 </div>
