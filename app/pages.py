@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, flash, url_for, redirect
 from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash
 from .models import User, Settings, Connection
 from . import db
 import smtplib 
@@ -13,6 +14,7 @@ import imaplib
 import email
 import os
 import re
+import signal 
 from .imap_functions import sort_folders, message_list, get_msg_body, get_id_list, move_msg_to_trash, move_msg
 
 # Load environment vars
@@ -23,28 +25,34 @@ PASS = os.environ['PASS']
 
 pages = Blueprint("pages", __name__)
 
-
 def use_imap():
 	# Connection settings.
-	imap_host = Connection.query.first().outgoing_hostname
+	imap_host = Connection.query.first().incoming_hostname
 	imap_user = User.query.first().email
 	imap_pass = PASS
 
 	# Initialize connection.
-	imap = imaplib.IMAP4(imap_host)
+	try:
+		imap = imaplib.IMAP4(imap_host)
+	except:
+		error_type = sys.exc_info()[1]
+		print("################# IMAP AUTH FAILED")
+		print(error_type)
+		return "Connection Failed"
+		
+
 	imap.starttls()
 	
 	# Auth to the server.
-#	try:
-	imap.login(imap_user, imap_pass)
-	imap.select()
-#		return imap
-#	except:
-#		exception = sys.exc_info()[0]
-#		print(type(exception))
-#
-	return imap
-	
+	try:
+		imap.login(imap_user, imap_pass)
+		imap.select()
+		return imap
+	except imaplib.IMAP4.error:
+		error_type = sys.exc_info()[1]
+		if "Authentication failed" in str(error_type):
+			print("################# IMAP AUTH FAILED")
+			return "Auth Failed"
 
 
 
@@ -66,9 +74,18 @@ def home():
 	num_msg_per_page = settings.num_msg_per_page
 
 	imap = use_imap()
-	print("------------")
-	print(imap)
-	print("------------")
+
+	if imap == "Auth Failed":
+		flash("IMAP Authentication Failed", category='error')
+		flash("Please double check your settings.", category='success')
+		full_url = url_for('.settings', page="user")
+		return redirect(full_url)
+
+	if imap == "Connection Failed":
+		flash("IMAP Connection Failure", category='error')
+		flash("Please double check your settings.", category='success')
+		full_url = url_for('.settings', page="connection")
+		return redirect(full_url)
 
 	# GET parameters
 	msg_num = request.args.get('msg_num', type = int)
@@ -165,7 +182,7 @@ def send():
 		subject = request.form.get("subject")
 		body = request.form.get("body")
 		draft = request.form.get("draft")
-		from_addr = Connection.query.first().email
+		from_addr = User.query.first().email
 		outgoing_hostname = Connection.query.first().outgoing_hostname
 		smtp_port = Connection.query.first().smtp_port
 
@@ -177,6 +194,18 @@ def send():
 
 		if bool(draft) == True:
 			imap = use_imap()
+
+			if imap == "Auth Failed":
+				flash("IMAP Authentication Failed", category='error')
+				flash("Please correct your Email settings.", category='success')
+				full_url = url_for('.settings', page="user")
+				return redirect(full_url)
+			if imap == "Connection Failed":
+				flash("IMAP Connection Failure", category='error')
+				flash("Please double check your settings.", category='success')
+				full_url = url_for('.settings', page="connection")
+				return redirect(full_url)
+
 			imap.select('INBOX.Drafts')
 			imap.append('INBOX.Drafts', '', imaplib.Time2Internaldate(time.time()), str(message).encode("utf-8"))
 			flash("Message saved to Drafts.", category='success')
@@ -215,6 +244,16 @@ def send():
 			subject = None
 		else:
 			imap = use_imap()
+			if imap == "Auth Failed":
+				flash("IMAP Authentication Failed", category='error')
+				flash("Please correct your Email settings.", category='success')
+				full_url = url_for('.settings', page="user")
+				return redirect(full_url)
+			if imap == "Connection Failed":
+				flash("IMAP Connection Failure", category='error')
+				flash("Please double check your settings.", category='success')
+				full_url = url_for('.settings', page="connection")
+				return redirect(full_url)
 			body = get_msg_body(imap, msg_num, folder)
 			print("#############  Message Body")
 
@@ -294,7 +333,7 @@ def settings():
 		num_msg_per_page = request.form.get("num_msg_per_page", type = int)
 		del_button_behavior = request.form.get("del_button_behavior")
 
-		if bool(page) == True and page == "general":
+		if page == "general":
 			if bool(num_msg_per_page) != True or bool(del_button_behavior) != True:
 				flash("Settings Missing!", category='error')
 				return render_template("settings.html", user=current_user, page="general")
@@ -305,20 +344,63 @@ def settings():
 				flash('General Settings Updated!', category='success')
 				full_url = url_for('.settings', page="general")
 				return redirect(full_url)
+		elif page == "user":
+			email = request.form.get("email")
+			password1 = request.form.get("password1")
+			password2 = request.form.get("password2")
 
-		print("Page: " + page)
-		print("Num Msg Per Page: " + str(num_msg_per_page))
-		print("Del Button Behavior: " + del_button_behavior)
+			if password1 != password2:
+				flash('Passwords don\'t match!', category='error')
+			elif len(password1) < 8:
+				flash('Password is too short.', category='error')
+			else:
+				new_user = User.query.filter_by(email=email).first()
+				new_user.password = generate_password_hash(password1, method='sha256')
+				db.session.commit()
 
-		return render_template("settings.html", user=current_user, page="general", num_msg_per_page=num_msg_per_page, del_button_behavior=del_button_behavior)
-	else:
-		page = request.args.get("page")
+				# Write password to .env file.
+				f = open(env_path, "w")
+				f.write(f"PASS='{password1}'")
+				f.close()
 
-		if bool(page) != True:
-			page = "general"
+				os.chmod(env_path, 0o600)
 
+				flash('User settings updated!', category='success')
+				full_url = url_for('.reload')
+#				full_url = url_for('.settings', page="user")
+				return redirect(full_url)
+		elif page == "connection":
+			incoming_hostname = request.form.get("incoming_hostname")
+			outgoing_hostname = request.form.get("outgoing_hostname")
+			smtp_port = request.form.get("smtp_port")
+			imap_port = request.form.get("imap_port")
 
-		return render_template("settings.html", user=current_user, page="general", num_msg_per_page=num_msg_per_page, del_button_behavior=del_button_behavior)
+			if bool(outgoing_hostname) != True or bool(incoming_hostname) != True or bool(smtp_port) != True or bool(imap_port) != True:
+				flash('Please enter all connection settings!', category='error')
+				full_url = url_for('.settings', page="connection")
+				return redirect(full_url)
+			else:
+				Connection.query.first().incoming_hostname = incoming_hostname
+				Connection.query.first().outgoing_hostname = outgoing_hostname
+				Connection.query.first().smtp_port = smtp_port
+				Connection.query.first().imap_port = imap_port
+				db.session.commit()
+
+				flash('Connection Settings Updated!', category='success')
+				full_url = url_for('.settings', page="connection")
+				return redirect(full_url)
+
+	page = request.args.get("page")
+
+	if bool(page) != True:
+		page = "general"
+
+	incoming_hostname = Connection.query.first().incoming_hostname
+	outgoing_hostname = Connection.query.first().outgoing_hostname
+	smtp_port = Connection.query.first().smtp_port
+	imap_port = Connection.query.first().imap_port
+
+	return render_template("settings.html", user=current_user, page="general", num_msg_per_page=num_msg_per_page, del_button_behavior=del_button_behavior, incoming_hostname=incoming_hostname, outgoing_hostname=outgoing_hostname, smtp_port=smtp_port, imap_port=imap_port)
 	
 
 
@@ -337,6 +419,17 @@ def trash():
 		return redirect(full_url)
 	else:
 		imap = use_imap()
+		if imap == "Auth Failed":
+			flash("IMAP Authentication Failed", category='error')
+			flash("Please correct your Email settings.", category='success')
+			full_url = url_for('.settings', page="user")
+		if imap == "Connection Failed":
+			flash("IMAP Connection Failure", category='error')
+			flash("Please double check your settings.", category='success')
+			full_url = url_for('.settings', page="connection")
+			return redirect(full_url)
+
+		return redirect(full_url)
 		response = move_msg_to_trash(imap, msg_num, folder, del_pref=gen_settings.del_button_behavior)
 		if response == "Trashed":
 			flash("Message moved to Trash!", category='success')
@@ -385,6 +478,16 @@ def msg_move():
 
 		imap = use_imap()
 
+		if imap == "Auth Failed":
+			flash("IMAP Authentication Failed", category='error')
+			flash("Please correct your Email settings.", category='success')
+			full_url = url_for('.settings', page="user")
+		if imap == "Connection Failed":
+			flash("IMAP Connection Failure", category='error')
+			flash("Please double check your settings.", category='success')
+			full_url = url_for('.settings', page="connection")
+			return redirect(full_url)
+
 		result = move_msg(imap, msg_num, src_folder, dst_folder)
 		if result == True:
 			flash(f"Message moved to {dst_folder}!", category='success')
@@ -394,6 +497,18 @@ def msg_move():
 			return redirect(f"/home?folder={src_folder}")
 
 
+
+######### Reload Page #########
+
+# Reload is required after password change in order for app to pick up new PASS
+# env var.
+@pages.route('/reload', methods=['GET', 'POST'])
+@login_required
+def reload():
+	if request.method == 'POST':
+		os.kill(os.getpid(), signal.SIGINT)
+	else:
+		return render_template("reload.html", user=current_user) 
 
 
 	

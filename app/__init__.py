@@ -2,6 +2,10 @@ from os import path
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+import sys
+
+# Prevent creation of __pycache__. Cache fucks up auth.
+sys.dont_write_bytecode = True
 
 db = SQLAlchemy()
 DB_NAME = "database.db"

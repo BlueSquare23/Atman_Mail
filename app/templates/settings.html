@@ -60,6 +60,7 @@
 			name="outgoing_hostname" 
 			class="form-control"
 			placeholder="Enter Outgoing Hostname"
+			value="{{outgoing_hostname}}"
 		/>
 
 		<label for="incoming_hostname" style="color: white">Incoming Mail Server Hostname</label>
@@ -68,6 +69,7 @@
 			name="incoming_hostname" 
 			class="form-control"
 			placeholder="Enter Incoming Hostname"
+			value="{{incoming_hostname}}"
 		/>
 
 		<label for="smtp_port" style="color: white">Outgoing Mail Server Port (SMTP)</label>
@@ -76,6 +78,7 @@
 			name="smtp_port" 
 			class="form-control"
 			placeholder="Enter Outgoing Port"
+			value="{{smtp_port}}"
 		/>
 
 		<label for="imap_port" style="color: white">Incoming Mail Server Port (IMAP)</label>
@@ -84,6 +87,7 @@
 			name="imap_port" 
 			class="form-control"
 			placeholder="Enter Incoming Port"
+			value="{{imap_port}}"
 		/>
 
 		<br/>
@@ -104,7 +108,7 @@
 	Ātman User Settings
 </h3>
 <form method="POST">
-	<input type="hidden" id="page" name="page" value="connection">
+	<input type="hidden" id="page" name="page" value="user">
 	<div class="form-group" style="color: white">
 		<label for="email">Email Address</label>
 		<input type="text" 
@@ -112,6 +116,7 @@
 			name="email" 
 			class="form-control"
 			placeholder="Enter Email Address"
+			value="{{user.email}}"
 		/>
 
 		<label for="password1" style="color: white">Password</label>

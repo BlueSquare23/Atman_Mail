@@ -37,6 +37,7 @@ def login():
 
 @auth.route("/setup", methods=['GET', 'POST'])
 def setup():
+
 	if request.method == 'POST':
 		# Collect form data
 		email = request.form.get("email")
@@ -75,6 +76,7 @@ def setup():
 			login_user(new_user, remember=True)
 			return redirect(url_for('pages.home'))
 
+	# If already a user added, disable the setup route.
 	if User.query.first() == None:
 		return render_template("setup.html", user=current_user)
 	else:

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Reloading{% endblock %}
+
+{% block content %}
+<div class="container bg-dark border border-secondary p-2">
+<h3>Reloading...</h3>
+<div class="spinner-border text-success" role="status">
+  <span class="visually-hidden">Reloading...</span>
+</div>
+<script>
+var xhr = new XMLHttpRequest();
+xhr.open('POST', '/reload', true);
+xhr.send();
+</script>
+
+<!-- Wait for 3 seconds and reload -->
+<script>
+setTimeout(function(){
+	window.location.href = '/home';
+}, 3000);
+</script>
+
+</div>
+
+{% endblock %}
