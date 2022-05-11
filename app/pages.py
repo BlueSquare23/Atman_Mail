@@ -161,7 +161,10 @@ def home():
 		body = get_msg_body(imap, msg_num, folder)
 	
 	id_list = get_id_list(imap, folder)
-	num_messages_in_folder = id_list[-1]
+	if len(id_list) > 0:
+		num_messages_in_folder = id_list[-1]
+	else:
+		num_messages_in_folder = 0
 
 	sorted_folders = sort_folders(imap)
 
@@ -574,6 +577,10 @@ def status():
 	
 		id_list = get_id_list(imap, folder)
 		num_messages_in_folder = id_list[-1]
+
+		imap.close()
+		imap.logout()
+
 		response = {"num_msgs": f"{num_messages_in_folder}"}
 		return response
 	else:

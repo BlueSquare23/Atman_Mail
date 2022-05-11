@@ -28,8 +28,6 @@
 					xhr.onreadystatechange = function () {
 						if (this.readyState == 4 && this.status == 200) {
 							response = JSON.parse(xhr.responseText);
-							console.log(response.num_msg);
-							console.log(typeof response.num_msgs);
 
 							if (response.num_msgs === cur_num_msgs) {
 								console.log('Number Messages Same');

@@ -8,6 +8,7 @@
 * Implement logging for, smtp/imap connections, db interactions, exceptions,
   and errors.
 * Implement testing.
+* Add check for messages frequency option to general settings page.
 
 ## Frontend
 
