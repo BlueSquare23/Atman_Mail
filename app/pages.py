@@ -36,8 +36,7 @@ def use_imap():
 		imap = imaplib.IMAP4(imap_host)
 	except:
 		error_type = sys.exc_info()[1]
-		print("################# IMAP AUTH FAILED")
-		print(error_type)
+		print("################# IMAP CONNECTION FAILED")
 		return "Connection Failed"
 		
 
@@ -116,11 +115,10 @@ def home():
 		id_list = get_id_list(imap, folder)
 		if id_list != []:
 			# Default to the latest message on the page.
-			print("Page Num: " + str(page_num))
-			print("Most Recent Email ID: " + str(id_list[-1]))
+			#print("Page Num: " + str(page_num))
+			#print("Most Recent Email ID: " + str(id_list[-1]))
 
 			top_msg_on_page = int(id_list[-1]) - (num_msg_per_page * page_num) + num_msg_per_page
-			print(top_msg_on_page)
 			full_url = url_for('.home', msg_num=top_msg_on_page, folder=folder, page_num=page_num)
 			imap.close()
 			imap.logout()
@@ -140,7 +138,6 @@ def home():
 
 		# If not on the right page change pages,
 		if int(page_num) != correct_page_num:
-			print("I Farted")
 			full_url = url_for('.home', page_num=correct_page_num, folder=folder, msg_num=msg_num)
 			imap.close()
 			imap.logout()
@@ -151,20 +148,17 @@ def home():
 		# Set messages list based off of page_num and msg_num.
 
 		# Round up integer division to get number pages total.
-		print("-----------")
-		print("Last Msg Num: "+str(last_msg_num))
-		print("Num Msg Per Page: "+str(num_msg_per_page))
-		print("Last Msg Num % Num Msg Per Page: "+str(last_msg_num % num_msg_per_page))
-		print("-----------")
+		# Debug info.
+		#print("-----------")
+		#print("Last Msg Num: "+str(last_msg_num))
+		#print("Num Msg Per Page: "+str(num_msg_per_page))
+		#print("Last Msg Num % Num Msg Per Page: "+str(last_msg_num % num_msg_per_page))
+		#print("-----------")
 		num_pages = int(last_msg_num / num_msg_per_page) + (last_msg_num % num_msg_per_page > 0)
 
-		# Magic pagination algorithm. Do not touch!
+		# Magic pagination algorithm. Will rewrite to make more readable soon.
 		messages = message_list(imap, folder, range((last_msg_num - (num_msg_per_page * page_num) + 1), (last_msg_num - ((page_num - 1) * num_msg_per_page) + 1)))
 		body = get_msg_body(imap, msg_num, folder)
-
-# All messages on one page.
-#		messages = message_list(imap, folder, get_id_list(imap))
-#		body = get_msg_body(msg_num)
 
 	sorted_folders = sort_folders(imap)
 
@@ -177,14 +171,42 @@ def home():
 @pages.route("/send", methods=['GET', 'POST'])
 @login_required
 def send():
+	def use_smtp(smtp_port, user):
+		if smtp_port == 465:
+			# Test smtp connection.
+			try:
+				smtp = smtplib.SMTP_SSL(outgoing_hostname, smtp_port)
+			except:
+				print("################# SMTP CONNECTION FAILED")
+				return "SMTP Connection Failed"
+		else:
+			# Test smtp connection.
+			try:
+				smtp = smtplib.SMTP(outgoing_hostname, smtp_port)
+				smtp.starttls(context=ssl.create_default_context())
+			except:
+				print("################# SMTP CONNECTION FAILED")
+				return "SMTP Connection Failed"
+
+		# Test SMTP Login
+		try:
+			smtp.login(user, PASS)
+		except:
+			print("################# SMTP AUTH FAILED")
+			return "SMTP Auth Failed"
+
+
+		return smtp
+
+	from_addr = User.query.first().email
+	outgoing_hostname = Connection.query.first().outgoing_hostname
+	smtp_port = Connection.query.first().smtp_port
+
 	if request.method == 'POST':
 		to_addr = request.form.get("to_addr")
 		subject = request.form.get("subject")
 		body = request.form.get("body")
 		draft = request.form.get("draft")
-		from_addr = User.query.first().email
-		outgoing_hostname = Connection.query.first().outgoing_hostname
-		smtp_port = Connection.query.first().smtp_port
 
 		message = EmailMessage()
 		message["To"]      = to_addr
@@ -215,28 +237,45 @@ def send():
 			full_url = url_for('.home')
 			return redirect(full_url)
 
-		if smtp_port == 465:
-			s = smtplib.SMTP_SSL(outgoing_hostname, smtp_port)
 		else:
-			s = smtplib.SMTP(outgoing_hostname, smtp_port)
-			s.starttls(context=ssl.create_default_context())
+			smtp = use_smtp(smtp_port, from_addr)
 
-		try:
-			s.login(from_addr, PASS)
-			s.sendmail(from_addr, to_addr, message.as_string())
-			s.quit()
+			if smtp == "SMTP Auth Failed":
+				flash("SMTP Authentication Failed", category='error')
+				flash("Please correct your Email settings.", category='success')
+				full_url = url_for('.settings', page="user")
+				return redirect(full_url)
+
+			if smtp == "SMTP Connection Failed":
+				flash("Sending Failed!", category='error')
+				full_url = url_for('.send')
+				return redirect(full_url)
+
+			smtp.sendmail(from_addr, to_addr, message.as_string())
+			smtp.quit()
 			flash("Message Sent!", category='success')
 			full_url = url_for('.home')
 			return redirect(full_url)
-		except:
-			flash("Sending Failed!", category='error')
-			full_url = url_for('.send')
-			return redirect(full_url)
+
 	else:
 		# GET parameters
 		msg_num = request.args.get('msg_num', type = int)
 		folder = request.args.get('folder')
 		mode = request.args.get('mode')
+
+		smtp = use_smtp(smtp_port, from_addr)
+
+		if smtp == "SMTP Auth Failed":
+			flash("SMTP Authentication Failed", category='error')
+			flash("Please correct your Email settings.", category='success')
+			full_url = url_for('.settings', page="user")
+			return redirect(full_url)
+
+		if smtp == "SMTP Connection Failed":
+			flash("SMTP Connection Failed!", category='error')
+			flash("Please double check your settings.", category='success')
+			full_url = url_for('.settings', page="connection")
+			return redirect(full_url)
 
 		if bool(msg_num) != True or bool(msg_num) != True or bool(mode) != True:
 			body = None
@@ -254,8 +293,8 @@ def send():
 				flash("Please double check your settings.", category='success')
 				full_url = url_for('.settings', page="connection")
 				return redirect(full_url)
+
 			body = get_msg_body(imap, msg_num, folder)
-			print("#############  Message Body")
 
 			# Get subject.
 			subject_line = body.split('\n', 3)[2]
@@ -367,7 +406,6 @@ def settings():
 
 				flash('User settings updated!', category='success')
 				full_url = url_for('.reload')
-#				full_url = url_for('.settings', page="user")
 				return redirect(full_url)
 		elif page == "connection":
 			incoming_hostname = request.form.get("incoming_hostname")
@@ -472,9 +510,6 @@ def msg_move():
 		full_url = url_for('.home')
 		return redirect(full_url)
 	else:
-		print(msg_num)
-		print(src_folder)
-		print(dst_folder)
 
 		imap = use_imap()
 

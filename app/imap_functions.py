@@ -109,7 +109,7 @@ def message_list(imap, folder, id_list):
 					msg = email.message_from_bytes(response_part[1])
 					messages.insert(0, [i, str(msg['from']), str(msg['subject']), str(msg['date'])])
 		except:
-			print("Out of range, Will l34rn 2 c0d3 2morrow!")
+			pass
 
 	return messages
 
