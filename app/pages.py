@@ -159,10 +159,13 @@ def home():
 		# Magic pagination algorithm. Will rewrite to make more readable soon.
 		messages = message_list(imap, folder, range((last_msg_num - (num_msg_per_page * page_num) + 1), (last_msg_num - ((page_num - 1) * num_msg_per_page) + 1)))
 		body = get_msg_body(imap, msg_num, folder)
+	
+	id_list = get_id_list(imap, folder)
+	num_messages_in_folder = id_list[-1]
 
 	sorted_folders = sort_folders(imap)
 
-	return render_template("home.html", user=current_user, sorted_folders=sorted_folders, messages=messages, body=body, num_pages=num_pages)
+	return render_template("home.html", user=current_user, sorted_folders=sorted_folders, messages=messages, body=body, num_pages=num_pages, num_messages_in_folder=num_messages_in_folder)
 
 
 
@@ -544,6 +547,38 @@ def reload():
 		os.kill(os.getpid(), signal.SIGINT)
 	else:
 		return render_template("reload.html", user=current_user) 
+
+
+
+######### Status Page #########
+
+# Quickly gets number of messages in folder.
+@pages.route('/status', methods=['POST'])
+@login_required
+def status():
+	if(request.data):
+		poll = request.get_json()
+		folder = poll['folder']
+
+		imap = use_imap()
+	
+		if imap == "Auth Failed":
+			flash("IMAP Authentication Failed", category='error')
+			flash("Please correct your Email settings.", category='success')
+			full_url = url_for('.settings', page="user")
+		if imap == "Connection Failed":
+			flash("IMAP Connection Failure", category='error')
+			flash("Please double check your settings.", category='success')
+			full_url = url_for('.settings', page="connection")
+			return redirect(full_url)
+	
+		id_list = get_id_list(imap, folder)
+		num_messages_in_folder = id_list[-1]
+		response = {"num_msgs": f"{num_messages_in_folder}"}
+		return response
+	else:
+		return {"Post":"Failed", "Error":"Fatal Error! Bad Request!"}, 400
+
 
 
 	

@@ -3,7 +3,6 @@
   everything. I keep accidentally committing broken code.
 
 ## New Feature
-* When you refresh after getting a new message it gives a "new message" alert.
 * Ability to see richly formatted messages and attachments in view msg window.
 * Add ability to have more than one user account. 
 * Implement logging for, smtp/imap connections, db interactions, exceptions,

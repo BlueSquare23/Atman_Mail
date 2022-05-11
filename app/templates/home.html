@@ -12,6 +12,38 @@
 	<div class="row justify-content-end">
 		<div class="col-xl-3">
 			<table class="table table-hover table-dark table-bordered table-condensed border-secondary sticky-lg-top" style="top: 20px">
+			<a id="new_msg" class="btn btn-primary badge rounded-pill bg-success" href="/home?folder={{request.args.get('folder')}}" role="button"></a>
+			<script>
+			var timeout = 10
+			function checkStatus(){
+				console.log('Waiting ' + timeout + ' seconds...');
+				setTimeout(function(){
+					console.log('Checking for new messages...');
+					var xhr = new XMLHttpRequest();
+					var url = '/status';
+					var cur_num_msgs = String({{num_messages_in_folder}});
+					xhr.open("POST", url, true);
+					xhr.setRequestHeader('Content-Type', 'application/json');
+					xhr.send(JSON.stringify({'folder': '{{request.args.get('folder')}}'}));
+					xhr.onreadystatechange = function () {
+						if (this.readyState == 4 && this.status == 200) {
+							response = JSON.parse(xhr.responseText);
+							console.log(response.num_msg);
+							console.log(typeof response.num_msgs);
+
+							if (response.num_msgs === cur_num_msgs) {
+								console.log('Number Messages Same');
+								checkStatus();
+							} else if (response.num_msgs !== parseInt({{num_messages_in_folder}}, 10)) {
+								console.log('Number Messages Different');
+								document.getElementById("new_msg").innerHTML = "New Message";
+							}
+						}
+					};
+				}, (timeout * 1000));
+			}
+			checkStatus();
+			</script>
 			  <thead>
 			    <tr>
 			      <th scope="col" title="Mailbox Folder">Folder</th>
