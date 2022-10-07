@@ -473,8 +473,8 @@ def trash():
 			full_url = url_for('.settings', page="connection")
 			return redirect(full_url)
 
-		return redirect(full_url)
 		response = move_msg_to_trash(imap, msg_num, folder, del_pref=gen_settings.del_button_behavior)
+
 		if response == "Trashed":
 			flash("Message moved to Trash!", category='success')
 			full_url = url_for('.home', folder=folder)
