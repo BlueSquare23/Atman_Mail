@@ -29,8 +29,8 @@ git clone https://github.com/BlueSquare23/Atman_Mail
 
 ```
 cd Atman_Mail
-virtualenv venv				# Virtual Env Optional
-source venv/bin/activate	# Virtual Env Optional
+virtualenv venv             # Virtual Env Optional
+source venv/bin/activate    # Virtual Env Optional
 pip3 install -r requirements.txt
 ```
 
